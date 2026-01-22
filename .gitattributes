@@ -1,0 +1,29 @@
+# Varsayılan davranışı ayarla ve metin dosyaları için LF satır sonlarını zorunlu kıl.
+* text=auto eol=lf
+
+# Metin olarak kabul edilmesini istediğiniz dosyaları açıkça belirtin.
+.gitignore      text eol=lf
+.gitattributes  text eol=lf
+*.css           text eol=lf
+*.html          text eol=lf
+*.js            text eol=lf
+*.jsx           text eol=lf
+*.json          text eol=lf
+*.md            text eol=lf
+*.mjs           text eol=lf
+*.prisma        text eol=lf
+*.sql           text eol=lf
+*.svg           text eol=lf
+*.ts            text eol=lf
+*.tsx           text eol=lf
+*.toml          text eol=lf
+*.yml           text eol=lf
+*.yaml          text eol=lf
+
+# İkili (binary) dosyaları belirtin, bu dosyalara dokunulmayacaktır.
+*.jpg      binary
+*.jpeg     binary
+*.png      binary
+*.gif      binary
+*.ico      binary
+*.pem      binary
