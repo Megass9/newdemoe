@@ -529,6 +529,7 @@ function ProductForm({ product, onSubmit, onCancel, title, categories }: Product
                 value={formData.categoryId}
                 onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                required
               >
                 <option value="">Kategori Seçin</option>
                 {categories.map(cat => (
