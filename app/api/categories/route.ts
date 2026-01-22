@@ -13,3 +13,23 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { name, description } = body;
+
+    if (!name) {
+      return NextResponse.json({ error: 'Kategori adı gereklidir.' }, { status: 400 });
+    }
+
+    const category = await prisma.category.create({
+      data: { name, description },
+    });
+
+    return NextResponse.json(category, { status: 201 });
+  } catch (error) {
+    console.error('Error creating category:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
