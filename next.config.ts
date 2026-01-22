@@ -7,7 +7,9 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  typedRoutes: false,
+  experimental: {
+    typedRoutes: false,
+  },
 };
 
 export default nextConfig;
