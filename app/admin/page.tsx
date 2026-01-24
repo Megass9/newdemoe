@@ -22,7 +22,8 @@ import {
   CheckCircle,
   Clock,
   Truck,
-  XCircle
+  XCircle,
+  List
 } from 'lucide-react';
 
 interface Order {
@@ -44,21 +45,21 @@ interface Order {
 }
 
 interface Product {
-  id: number;
+  id: string;
   name: string;
   price: number;
   description?: string;
   images: string[];
   category?: {
-    id: number;
+    id: string;
     name: string;
   };
-  categoryId?: number;
+  categoryId?: string;
   stock?: number;
 }
 
 interface Category {
-  id: number;
+  id: string;
   name: string;
   description?: string;
 }
@@ -73,6 +74,8 @@ export default function AdminPanel() {
   const [loading, setLoading] = useState(false);
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [showAddCategory, setShowAddCategory] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
 
@@ -170,7 +173,7 @@ export default function AdminPanel() {
     }
   };
 
-  const deleteProduct = async (productId: number) => {
+  const deleteProduct = async (productId: string) => {
     if (!confirm('Bu ürünü silmek istediğinizden emin misiniz?')) return;
 
     try {
@@ -214,7 +217,7 @@ export default function AdminPanel() {
     }
   };
 
-  const updateProduct = async (productId: number, productData: Partial<Product>) => {
+  const updateProduct = async (productId: string, productData: Partial<Product>) => {
     try {
       const response = await fetch(`/api/products/${productId}`, {
         method: 'PATCH',
@@ -237,6 +240,62 @@ export default function AdminPanel() {
     } catch (error) {
       console.error('Error updating product:', error);
       alert('Hata oluştu!');
+    }
+  };
+
+  const deleteCategory = async (categoryId: string) => {
+    if (!confirm('Bu kategoriyi silmek istediğinizden emin misiniz?')) return;
+
+    try {
+      const response = await fetch(`/api/categories/${categoryId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setCategories(categories.filter(c => c.id !== categoryId));
+        alert('Kategori başarıyla silindi!');
+      } else {
+        alert('Kategori silinirken hata oluştu!');
+      }
+    } catch (error) {
+      console.error('Error deleting category:', error);
+      alert('Hata oluştu!');
+    }
+  };
+
+  const addCategory = async (categoryData: Omit<Category, 'id'>) => {
+    try {
+      const response = await fetch('/api/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(categoryData),
+      });
+      if (response.ok) {
+        const newCategory = await response.json();
+        setCategories([...categories, newCategory]);
+        setShowAddCategory(false);
+        alert('Kategori eklendi!');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const updateCategory = async (categoryId: string, categoryData: Partial<Category>) => {
+    try {
+      const response = await fetch(`/api/categories/${categoryId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(categoryData),
+      });
+      if (response.ok) {
+        const updatedCategory = await response.json();
+        setCategories(categories.map(c => c.id === categoryId ? updatedCategory : c));
+        setEditingCategory(null);
+        alert('Kategori güncellendi!');
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -373,6 +432,20 @@ export default function AdminPanel() {
                     Ürünler
                     <span className="ml-auto bg-gray-100 text-gray-600 text-xs py-0.5 px-2 rounded-full">
                       {products.length}
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('categories')}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                      activeTab === 'categories' 
+                        ? 'bg-blue-50 text-blue-600 font-medium' 
+                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    }`}
+                  >
+                    <List className="w-5 h-5" />
+                    Kategoriler
+                    <span className="ml-auto bg-gray-100 text-gray-600 text-xs py-0.5 px-2 rounded-full">
+                      {categories.length}
                     </span>
                   </button>
                 </nav>
@@ -597,13 +670,72 @@ export default function AdminPanel() {
                             </p>
                             <div className="flex items-center justify-between text-xs text-gray-400 border-t border-gray-50 pt-3">
                               <span>Stok: {product.stock || 0}</span>
-                              <span>{product.category?.name || 'Kategorisiz'}</span>
+                              <span>
+                                {categories.find(c => c.id === product.categoryId)?.name || 'Kategorisiz'}
+                              </span>
                             </div>
                           </div>
                         </div>
                       ))}
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Categories Tab */}
+              {activeTab === 'categories' && (
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                    <h2 className="text-xl font-bold text-gray-800">Kategoriler</h2>
+                    <button
+                      onClick={() => setShowAddCategory(true)}
+                      className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-blue-600/20"
+                    >
+                      <Plus className="w-5 h-5" />
+                      Yeni Kategori
+                    </button>
+                  </div>
+
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <table className="w-full text-left">
+                      <thead className="bg-gray-50 text-gray-600 text-xs uppercase font-semibold">
+                        <tr>
+                          <th className="px-6 py-4">Kategori Adı</th>
+                          <th className="px-6 py-4">Açıklama</th>
+                          <th className="px-6 py-4 text-right">İşlemler</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {categories.map(category => (
+                          <tr key={category.id} className="hover:bg-gray-50/50 transition-colors">
+                            <td className="px-6 py-4 font-medium text-gray-900">{category.name}</td>
+                            <td className="px-6 py-4 text-gray-600 text-sm">{category.description || '-'}</td>
+                            <td className="px-6 py-4 text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                <button
+                                  onClick={() => setEditingCategory(category)}
+                                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                  title="Düzenle"
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => deleteCategory(category.id)}
+                                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                  title="Sil"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                        {categories.length === 0 && (
+                          <tr><td colSpan={3} className="px-6 py-8 text-center text-gray-500">Kategori bulunamadı.</td></tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
             </main>
@@ -630,9 +762,81 @@ export default function AdminPanel() {
               onCategoryAdd={fetchCategories}
             />
           )}
+
+          {showAddCategory && (
+            <CategoryForm
+              onSubmit={addCategory}
+              onCancel={() => setShowAddCategory(false)}
+              title="Yeni Kategori Ekle"
+            />
+          )}
+
+          {editingCategory && (
+            <CategoryForm
+              category={editingCategory}
+              onSubmit={(data) => updateCategory(editingCategory.id, data)}
+              onCancel={() => setEditingCategory(null)}
+              title="Kategori Düzenle"
+            />
+          )}
         </div>
       </div>
       <Footer />
+    </div>
+  );
+}
+
+interface CategoryFormProps {
+  category?: Category;
+  onSubmit: (data: Omit<Category, 'id'>) => void;
+  onCancel: () => void;
+  title: string;
+}
+
+function CategoryForm({ category, onSubmit, onCancel, title }: CategoryFormProps) {
+  const [formData, setFormData] = useState({
+    name: category?.name || '',
+    description: category?.description || '',
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(formData);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+        <div className="flex items-center justify-between p-6 border-b border-gray-100">
+          <h3 className="text-xl font-bold text-gray-900">{title}</h3>
+          <button onClick={onCancel} className="text-gray-400 hover:text-gray-600 transition-colors"><X className="w-6 h-6" /></button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Kategori Adı</label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Açıklama</label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+              rows={3}
+            />
+          </div>
+          <div className="flex gap-3 pt-2">
+            <button type="button" onClick={onCancel} className="flex-1 bg-white border border-gray-200 text-gray-700 py-2.5 rounded-xl font-medium hover:bg-gray-50">İptal</button>
+            <button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl font-medium shadow-lg shadow-blue-600/20">Kaydet</button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

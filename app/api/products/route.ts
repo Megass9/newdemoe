@@ -1,20 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '../../../lib/prisma';
+import { db } from '../../../lib/firebase';
+import { collection, getDocs, addDoc } from 'firebase/firestore';
 
 export async function GET(request: NextRequest) {
   try {
-    const products = await prisma.product.findMany({
-      include: { category: true },
-      orderBy: { createdAt: 'desc' }
-    });
-
-    // Resimleri JSON string'den array'e çevir
-    const parsedProducts = products.map(product => ({
-      ...product,
-      images: product.images ? JSON.parse(product.images) : []
+    const querySnapshot = await getDocs(collection(db, "products"));
+    const products = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
     }));
 
-    return NextResponse.json(parsedProducts);
+    return NextResponse.json(products);
   } catch (error) {
     console.error('Ürünleri getirme hatası:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -26,18 +22,18 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, description, price, stock, categoryId, images } = body;
 
-    const product = await prisma.product.create({
-      data: {
-        name,
-        description,
-        price: parseFloat(price),
-        stock: parseInt(stock),
-        categoryId: parseInt(categoryId),
-        images: JSON.stringify(images || []), // Array'i string olarak sakla
-      },
-    });
+    const newProduct = {
+      name,
+      description,
+      price: Number(price),
+      stock: Number(stock),
+      categoryId: String(categoryId),
+      images: images || [],
+      createdAt: new Date().toISOString()
+    };
 
-    return NextResponse.json(product, { status: 201 });
+    const docRef = await addDoc(collection(db, "products"), newProduct);
+    return NextResponse.json({ id: docRef.id, ...newProduct }, { status: 201 });
   } catch (error) {
     console.error('Ürün ekleme hatası:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

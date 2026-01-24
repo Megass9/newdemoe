@@ -1,20 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '../../../../lib/prisma';
+import { db } from '../../../../lib/firebase';
+import { doc, getDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const product = await prisma.product.findUnique({
-      where: { id: parseInt(params.id) },
-      include: { category: true }
-    });
+    const docRef = doc(db, "products", params.id);
+    const docSnap = await getDoc(docRef);
 
-    if (!product) {
+    if (!docSnap.exists()) {
       return NextResponse.json({ error: 'Ürün bulunamadı' }, { status: 404 });
     }
 
     return NextResponse.json({
-      ...product,
-      images: product.images ? JSON.parse(product.images) : []
+      id: docSnap.id,
+      ...docSnap.data()
     });
   } catch (error) {
     return NextResponse.json({ error: 'Hata oluştu' }, { status: 500 });
@@ -23,9 +22,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    await prisma.product.delete({
-      where: { id: parseInt(params.id) }
-    });
+    await deleteDoc(doc(db, "products", params.id));
     return NextResponse.json({ message: 'Ürün silindi' });
   } catch (error) {
     return NextResponse.json({ error: 'Silme işlemi başarısız' }, { status: 500 });
@@ -42,19 +39,18 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       description,
       price: price ? parseFloat(price) : undefined,
       stock: stock ? parseInt(stock) : undefined,
-      categoryId: categoryId ? parseInt(categoryId) : undefined,
+      categoryId: categoryId ? String(categoryId) : undefined,
     };
 
     if (images) {
-      updateData.images = JSON.stringify(images);
+      updateData.images = images;
     }
 
-    const product = await prisma.product.update({
-      where: { id: parseInt(params.id) },
-      data: updateData
-    });
+    const docRef = doc(db, "products", params.id);
+    await updateDoc(docRef, updateData);
 
-    return NextResponse.json(product);
+    const docSnap = await getDoc(docRef);
+    return NextResponse.json({ id: docSnap.id, ...docSnap.data() });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: 'Güncelleme başarısız' }, { status: 500 });
