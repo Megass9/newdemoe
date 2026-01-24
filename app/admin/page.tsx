@@ -24,7 +24,8 @@ import {
   Truck,
   XCircle,
   List,
-  Phone
+  Phone,
+  RefreshCw
 } from 'lucide-react';
 
 interface Order {
@@ -555,7 +556,16 @@ export default function AdminPanel() {
               {activeTab === 'orders' && (
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                   <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <h2 className="text-xl font-bold text-gray-800">Siparişler</h2>
+                    <div className="flex items-center gap-3">
+                      <h2 className="text-xl font-bold text-gray-800">Siparişler</h2>
+                      <button 
+                        onClick={fetchOrders} 
+                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-blue-600"
+                        title="Listeyi Yenile"
+                      >
+                        <RefreshCw className="w-4 h-4" />
+                      </button>
+                    </div>
                     <div className="relative w-full sm:w-64">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <input
@@ -644,6 +654,15 @@ export default function AdminPanel() {
               {activeTab === 'products' && (
                 <div className="space-y-6">
                   <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                    <div className="flex items-center gap-2">
+                       <button 
+                        onClick={fetchProducts} 
+                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-blue-600"
+                        title="Listeyi Yenile"
+                      >
+                        <RefreshCw className="w-5 h-5" />
+                      </button>
+                    </div>
                     <div className="relative w-full sm:w-96">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <input
@@ -720,7 +739,16 @@ export default function AdminPanel() {
               {activeTab === 'categories' && (
                 <div className="space-y-6">
                   <div className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-                    <h2 className="text-xl font-bold text-gray-800">Kategoriler</h2>
+                    <div className="flex items-center gap-3">
+                      <h2 className="text-xl font-bold text-gray-800">Kategoriler</h2>
+                      <button 
+                        onClick={fetchCategories} 
+                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-blue-600"
+                        title="Listeyi Yenile"
+                      >
+                        <RefreshCw className="w-5 h-5" />
+                      </button>
+                    </div>
                     <button
                       onClick={() => setShowAddCategory(true)}
                       className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-blue-600/20"
