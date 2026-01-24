@@ -1,16 +1,58 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useUser } from '../context/UserContext';
-import { ShoppingCart, Search, Menu, Phone } from 'lucide-react';
+import { ShoppingCart, Search, Menu, Phone, X, User, ChevronDown } from 'lucide-react';
+
+interface Category {
+  id: number;
+  name: string;
+}
 
 export default function Header() {
   const { user, logout, isLoggedIn } = useUser();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch('/api/categories');
+        if (res.ok) {
+          setCategories(await res.json());
+        }
+      } catch (error) {
+        console.error("Kategoriler yüklenemedi:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    const controlNavbar = () => {
+      if (typeof window !== 'undefined') {
+        if (window.scrollY > lastScrollY && window.scrollY > 100) {
+          setIsVisible(false);
+          setIsMenuOpen(false);
+        } else {
+          setIsVisible(true);
+        }
+        setLastScrollY(window.scrollY);
+      }
+    };
+
+    window.addEventListener('scroll', controlNavbar);
+    return () => {
+      window.removeEventListener('scroll', controlNavbar);
+    };
+  }, [lastScrollY]);
 
   return (
-    <nav className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100">
+    <nav className={`bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100 transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
       <div className="container mx-auto px-4 h-20 flex justify-between items-center">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group cursor-pointer">
@@ -37,18 +79,20 @@ export default function Header() {
 
         {/* Actions */}
         <div className="flex items-center gap-6">
-          {isLoggedIn ? (
-            <div className="hidden md:flex items-center gap-4">
-              <Link href="/profil" className="font-medium text-gray-600 hover:text-blue-600 transition">
-                {user?.displayName || user?.email}
+          <div className="hidden md:flex items-center gap-4">
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2 hover:bg-gray-100 rounded-full transition" title="Menü" aria-label="Menüyü aç/kapat">
+               {isMenuOpen ? <X className="w-6 h-6 text-gray-700" /> : <Menu className="w-6 h-6 text-gray-700" />}
+            </button>
+            {isLoggedIn ? (
+              <Link href="/profil" className="p-2 hover:bg-gray-100 rounded-full transition" title="Profil">
+                <User className="w-6 h-6 text-gray-700" />
               </Link>
-              <button onClick={logout} className="text-gray-500 hover:text-blue-600 text-sm font-medium">Çıkış</button>
-            </div>
-          ) : (
-            <Link href="/giris" className="hidden md:block font-medium text-gray-600 hover:text-blue-600 transition">
-              Giriş Yap
-            </Link>
-          )}
+            ) : (
+              <Link href="/giris" className="font-medium text-gray-600 hover:text-blue-600 transition">
+                Giriş Yap
+              </Link>
+            )}
+          </div>
           
           <Link href="/sepet" className="relative p-2 hover:bg-gray-100 rounded-full transition">
             <ShoppingCart className="w-6 h-6 text-gray-700" />
@@ -56,23 +100,48 @@ export default function Header() {
               2
             </span>
           </Link>
-          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden p-2">
-            <Menu className="w-6 h-6 text-gray-700" />
+          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden p-2" aria-label="Mobil menüyü aç/kapat">
+            {isMenuOpen ? <X className="w-6 h-6 text-gray-700" /> : <Menu className="w-6 h-6 text-gray-700" />}
           </button>
         </div>
       </div>
-      {/* Mobile Menu */}
+      {/* Main Menu (Desktop and Mobile) */}
       {isMenuOpen && (
-          <div className="md:hidden bg-white border-t border-gray-100 py-4 px-4 space-y-4">
-             <Link href="/" className="block text-gray-700 hover:text-blue-600">Ana Sayfa</Link>
-             <Link href="/kategoriler" className="block text-gray-700 hover:text-blue-600">Kategoriler</Link>
+          <div className="bg-white border-t border-gray-100 py-4 px-4 space-y-2 absolute top-20 left-0 w-full shadow-lg z-40">
+             <Link href="/" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-50 hover:text-blue-600">Ana Sayfa</Link>
+             <Link href="/urunler" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-50 hover:text-blue-600">Tüm Ürünler</Link>
+             
+             {/* Categories Dropdown */}
+             <div>
+                <button onClick={() => setIsCategoryMenuOpen(!isCategoryMenuOpen)} className="w-full flex justify-between items-center px-3 py-2 rounded-md text-gray-700 hover:bg-gray-50 hover:text-blue-600">
+                    <span>Kategoriler</span>
+                    <ChevronDown className={`w-4 h-4 transition-transform ${isCategoryMenuOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {isCategoryMenuOpen && (
+                    <div className="pl-4 mt-2 space-y-2 border-l-2 border-gray-100">
+                        {categories.map(category => (
+                            <Link 
+                                key={category.id} 
+                                href={`/kategori/${encodeURIComponent(category.name)}`} 
+                                onClick={() => setIsMenuOpen(false)} 
+                                className="block px-3 py-1 rounded-md text-gray-500 hover:bg-gray-100 hover:text-blue-600"
+                            >
+                                {category.name}
+                            </Link>
+                        ))}
+                    </div>
+                )}
+             </div>
+
+             <div className="border-t my-2"></div>
+
              {isLoggedIn ? (
                  <>
-                    <Link href="/profil" className="block text-gray-700 hover:text-blue-600">Profil</Link>
-                    <button onClick={logout} className="block text-gray-500 hover:text-blue-600">Çıkış</button>
+                    <Link href="/profil" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-50 hover:text-blue-600">Profil</Link>
+                    <button onClick={() => { logout(); setIsMenuOpen(false); }} className="block px-3 py-2 rounded-md text-red-500 hover:bg-red-50 w-full text-left">Çıkış</button>
                  </>
              ) : (
-                 <Link href="/giris" className="block text-gray-700 hover:text-blue-600">Giriş Yap</Link>
+                 <Link href="/giris" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-50 hover:text-blue-600">Giriş Yap</Link>
              )}
           </div>
       )}

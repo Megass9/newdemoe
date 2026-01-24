@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 
 interface Order {
-  id: number;
+  id: string;
   status: string;
   total: number;
   createdAt: string;
@@ -145,7 +145,7 @@ export default function AdminPanel() {
     }
   };
 
-  const updateOrderStatus = async (orderId: number, newStatus: string) => {
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
       const response = await fetch(`/api/orders/${orderId}`, {
         method: 'PATCH',
