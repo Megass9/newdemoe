@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useCart } from '../context/CartContext';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { Check, ShoppingCart } from 'lucide-react';
 
 interface Product {
   id: number;
@@ -21,6 +22,15 @@ export default function Kategoriler() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
   const [sort, setSort] = useState('');
+  const [addedProducts, setAddedProducts] = useState<number[]>([]);
+
+  const handleAddToCart = (product: Product) => {
+    addToCart(product);
+    setAddedProducts(prev => [...prev, product.id]);
+    setTimeout(() => {
+      setAddedProducts(prev => prev.filter(id => id !== product.id));
+    }, 2000);
+  };
 
   useEffect(() => {
     fetch('/api/products')
@@ -113,10 +123,14 @@ export default function Kategoriler() {
                 </Link>
                 <p className="text-gray-600">{product.price} TL</p>
                 <button
-                  onClick={() => addToCart(product)}
-                  className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full"
+                  onClick={() => handleAddToCart(product)}
+                  className={`mt-4 text-white px-4 py-2 rounded w-full flex items-center justify-center gap-2 transition-colors ${addedProducts.includes(product.id) ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'}`}
                 >
-                  Sepete Ekle
+                  {addedProducts.includes(product.id) ? (
+                    <><Check className="w-4 h-4" /> Eklendi</>
+                  ) : (
+                    'Sepete Ekle'
+                  )}
                 </button>
               </div>
             </div>

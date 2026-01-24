@@ -28,6 +28,7 @@ export default function RootLayout({
     <html lang="tr">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        style={{ overscrollBehaviorX: "contain", overscrollBehaviorY: "contain" }}
       >
         <UserProvider>
           <CartProvider>

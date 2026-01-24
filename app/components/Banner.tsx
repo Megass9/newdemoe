@@ -1,4 +1,5 @@
 import { ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Banner() {
   return (
@@ -21,12 +22,12 @@ export default function Banner() {
               En yeni akıllı cihazlar, orijinal aksesuarlar ve Vadeli İletişim güvencesiyle tanışın. Hızlı kargo ve güvenli ödeme.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start pt-4">
-              <button className="bg-white text-gray-900 px-8 py-4 rounded-full font-bold hover:bg-gray-100 transition flex items-center justify-center gap-2 shadow-xl shadow-white/10">
+              <Link href="/urunler" className="bg-white text-gray-900 px-8 py-4 rounded-full font-bold hover:bg-gray-100 transition flex items-center justify-center gap-2 shadow-xl shadow-white/10">
                 Alışverişe Başla <ArrowRight className="w-5 h-5" />
-              </button>
-              <button className="px-8 py-4 rounded-full font-bold border border-white/20 hover:bg-white/10 transition backdrop-blur-sm">
+              </Link>
+              <Link href="/urunler" className="px-8 py-4 rounded-full font-bold border border-white/20 hover:bg-white/10 transition backdrop-blur-sm flex items-center justify-center">
                 Kategorileri Keşfet
-              </button>
+              </Link>
             </div>
           </div>
           

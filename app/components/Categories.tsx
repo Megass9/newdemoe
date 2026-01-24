@@ -1,4 +1,5 @@
 import { Smartphone, Shield, Zap, Headphones, Tablet, Wrench, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 
 const categories = [
   {
@@ -66,9 +67,10 @@ export default function Categories() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {categories.map((category, index) => (
-            <div
+            <Link
+              href={`/urunler?category=${encodeURIComponent(category.name)}`}
               key={category.id}
-              className="group relative bg-white rounded-2xl border border-gray-100 hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
+              className="group relative bg-white rounded-2xl border border-gray-100 hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer block"
               style={{ animationDelay: `${index * 150}ms` }}
             >
               {/* Background Gradient */}
@@ -112,7 +114,7 @@ export default function Categories() {
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 
@@ -121,9 +123,9 @@ export default function Categories() {
           <p className="text-gray-600 mb-6">
             Daha fazla kategori ve ürün için keşfetmeye devam edin
           </p>
-          <button className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-full font-semibold hover:from-blue-700 hover:to-indigo-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl">
+          <Link href="/urunler" className="inline-block bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-full font-semibold hover:from-blue-700 hover:to-indigo-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl">
             Tüm Kategorileri Gör
-          </button>
+          </Link>
         </div>
       </div>
     </section>

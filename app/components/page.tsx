@@ -2,80 +2,58 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useCart } from '../context/CartContext';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
+import { useCart } from '../../context/CartContext';
+import Header from '../../components/Header';
+import Footer from '../../components/Footer';
+import { ShoppingCart, ArrowLeft, PackageX } from 'lucide-react';
 
 interface Product {
-  id: number;
+  id: string;
   name: string;
   price: number;
   images: string[];
-  category: { name: string };
+  category?: { name: string };
 }
 
-export default function Urunler() {
+export default function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const { addToCart } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('');
-  const [sort, setSort] = useState('');
+  const [categoryName, setCategoryName] = useState('');
 
   useEffect(() => {
-    fetch('/api/products')
-      .then(res => res.json())
-      .then(data => {
+    params.then(p => setCategoryName(decodeURIComponent(p.slug)));
+  }, [params]);
+
+  useEffect(() => {
+    if (!categoryName) return;
+
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch('/api/products');
+        const data = await res.json();
         if (Array.isArray(data)) {
-          setProducts(data);
-          setFilteredProducts(data);
-        } else {
-          setProducts([]);
-          setFilteredProducts([]);
+          const filtered = data.filter((p: Product) => 
+            p.category?.name?.toLowerCase() === categoryName.toLowerCase()
+          );
+          setProducts(filtered);
         }
-        setLoading(false);
-      })
-      .catch(error => {
+      } catch (error) {
         console.error('Error fetching products:', error);
+      } finally {
         setLoading(false);
-      });
-  }, []);
+      }
+    };
 
-  useEffect(() => {
-    let filtered = [...products];
-
-    if (filter && filter !== '') {
-      filtered = filtered.filter(p => p.category.name === filter);
-    }
-
-    if (sort === 'price-asc') {
-      filtered.sort((a, b) => a.price - b.price);
-    } else if (sort === 'price-desc') {
-      filtered.sort((a, b) => b.price - a.price);
-    } else if (sort === 'newest') {
-      filtered.sort((a, b) => b.id - a.id);
-    }
-
-    setFilteredProducts(filtered);
-  }, [filter, sort, products]);
+    fetchProducts();
+  }, [categoryName]);
 
   if (loading) {
     return (
-      <div>
+      <div className="min-h-screen flex flex-col">
         <Header />
-        <div className="container mx-auto px-4 py-16">
-          <h1 className="text-3xl font-bold mb-8">Tüm Ürünler</h1>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="bg-white shadow-md rounded-lg overflow-hidden animate-pulse">
-                <div className="w-full h-48 bg-gray-300"></div>
-                <div className="p-4">
-                  <div className="h-4 bg-gray-300 rounded mb-2"></div>
-                  <div className="h-4 bg-gray-300 rounded w-1/2"></div>
-                </div>
-              </div>
-            ))}
-          </div>
+        <div className="flex-grow flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
         </div>
         <Footer />
       </div>
@@ -83,46 +61,67 @@ export default function Urunler() {
   }
 
   return (
-    <div>
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
-      <div className="container mx-auto px-4 py-16">
-        <h1 className="text-3xl font-bold mb-8">Tüm Ürünler</h1>
-        <div className="flex gap-4 mb-8">
-          <select onChange={(e) => setFilter(e.target.value)} className="p-2 border rounded">
-            <option value="">Tüm Kategoriler</option>
-            <option value="Elektronik">Elektronik</option>
-            <option value="Giyim">Giyim</option>
-            <option value="Ev & Yaşam">Ev & Yaşam</option>
-          </select>
-          <select onChange={(e) => setSort(e.target.value)} className="p-2 border rounded">
-            <option value="">Sırala</option>
-            <option value="newest">En Yeni</option>
-            <option value="price-asc">Fiyat Artan</option>
-            <option value="price-desc">Fiyat Azalan</option>
-          </select>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {Array.isArray(filteredProducts) && filteredProducts.map(product => (
-            <div key={product.id} className="bg-white shadow-md rounded-lg overflow-hidden">
-              <Link href={`/urun/${product.id}`}>
-                <img src={product.images[0] || '/placeholder.jpg'} alt={product.name} className="w-full h-48 object-cover cursor-pointer" />
-              </Link>
-              <div className="p-4">
-                <Link href={`/urun/${product.id}`}>
-                  <h3 className="text-lg font-semibold cursor-pointer hover:text-blue-600">{product.name}</h3>
-                </Link>
-                <p className="text-gray-600">{product.price} TL</p>
-                <button
-                  onClick={() => addToCart(product)}
-                  className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full"
-                >
-                  Sepete Ekle
-                </button>
-              </div>
+      
+      <main className="flex-grow container mx-auto px-4 py-8">
+        <div className="flex items-center gap-4 mb-8">
+            <Link href="/" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                <ArrowLeft className="w-6 h-6 text-gray-600" />
+            </Link>
+            <div>
+                <h1 className="text-3xl font-bold text-gray-900">{categoryName}</h1>
+                <p className="text-gray-500 mt-1">{products.length} ürün listeleniyor</p>
             </div>
-          ))}
         </div>
-      </div>
+
+        {products.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-gray-100 shadow-sm">
+            <div className="bg-gray-50 p-6 rounded-full mb-4">
+                <PackageX className="w-12 h-12 text-gray-400" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Ürün Bulunamadı</h2>
+            <p className="text-gray-500 mb-6 text-center max-w-md">
+              Bu kategoride henüz ürün bulunmuyor. Diğer kategorilerimize göz atabilirsiniz.
+            </p>
+            <Link href="/urunler" className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-medium hover:bg-blue-700 transition-colors">
+              Tüm Ürünleri Gör
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {products.map(product => (
+              <div key={product.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all group">
+                <Link href={`/urun/${product.id}`}>
+                  <div className="aspect-square bg-gray-100 relative overflow-hidden">
+                    <img 
+                      src={product.images[0] || '/placeholder.jpg'} 
+                      alt={product.name} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                    />
+                  </div>
+                </Link>
+                <div className="p-4">
+                  <Link href={`/urun/${product.id}`}>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-1 line-clamp-1 hover:text-blue-600 transition-colors">{product.name}</h3>
+                  </Link>
+                  <div className="flex items-center justify-between mt-3">
+                    <span className="text-xl font-bold text-blue-600">{product.price.toLocaleString('tr-TR')} TL</span>
+                    <button
+                      onClick={() => addToCart(product)}
+                      className="bg-gray-900 text-white p-2.5 rounded-full hover:bg-blue-600 transition-colors shadow-lg shadow-gray-900/20"
+                      title="Sepete Ekle"
+                    >
+                      <ShoppingCart className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </main>
+      
       <Footer />
     </div>
   );

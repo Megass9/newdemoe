@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useCart } from '../context/CartContext';
-import { ShoppingCart, Star, ArrowRight } from 'lucide-react';
+import { ShoppingCart, Star, ArrowRight, Check } from 'lucide-react';
 
 interface Product {
   id: number;
@@ -16,6 +16,15 @@ export default function FeaturedProducts() {
   const { addToCart } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [addedProducts, setAddedProducts] = useState<number[]>([]);
+
+  const handleAddToCart = (product: Product) => {
+    addToCart(product);
+    setAddedProducts(prev => [...prev, product.id]);
+    setTimeout(() => {
+      setAddedProducts(prev => prev.filter(id => id !== product.id));
+    }, 2000);
+  };
 
   useEffect(() => {
     fetch('/api/products')
@@ -46,7 +55,7 @@ export default function FeaturedProducts() {
             <h3 className="text-3xl font-bold text-gray-900">Öne Çıkanlar</h3>
             <p className="text-gray-500 mt-2">Bu hafta en çok satan ürünlerimiz.</p>
           </div>
-          <Link href="/kategoriler" className="text-blue-600 font-semibold hover:text-blue-700 flex items-center gap-1">
+          <Link href="/urunler" className="text-blue-600 font-semibold hover:text-blue-700 flex items-center gap-1">
             Tümünü Gör <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -64,10 +73,14 @@ export default function FeaturedProducts() {
                   Teknoloji
                 </div>
                 <button 
-                  onClick={() => addToCart(product)}
-                  className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-2.5 rounded-full text-sm font-medium shadow-lg translate-y-12 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition duration-300 w-10/12 flex items-center justify-center gap-2"
+                  onClick={() => handleAddToCart(product)}
+                  className={`absolute bottom-4 left-1/2 -translate-x-1/2 px-6 py-2.5 rounded-full text-sm font-medium shadow-lg translate-y-12 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition duration-300 w-10/12 flex items-center justify-center gap-2 ${addedProducts.includes(product.id) ? 'bg-green-600 text-white' : 'bg-gray-900 text-white'}`}
                 >
-                  <ShoppingCart className="w-4 h-4" /> Sepete Ekle
+                  {addedProducts.includes(product.id) ? (
+                    <><Check className="w-4 h-4" /> Eklendi</>
+                  ) : (
+                    <><ShoppingCart className="w-4 h-4" /> Sepete Ekle</>
+                  )}
                 </button>
               </div>
               

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Header from '../components/Header';
+import Link from 'next/link';
 import Footer from '../components/Footer';
 import {
   LayoutDashboard,
@@ -23,7 +23,8 @@ import {
   Clock,
   Truck,
   XCircle,
-  List
+  List,
+  Phone
 } from 'lucide-react';
 
 interface Order {
@@ -59,10 +60,31 @@ interface Product {
 }
 
 interface Category {
-  id: string;
+  id: string | number;
   name: string;
   description?: string;
 }
+
+const SimpleHeader = () => (
+  <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <div className="container mx-auto px-4 h-20 flex items-center justify-between">
+      <Link href="/" className="flex items-center gap-2 group cursor-pointer">
+        <div className="bg-blue-600 p-2.5 rounded-xl group-hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20">
+          <Phone className="text-white w-6 h-6" />
+        </div>
+        <div className="flex flex-col">
+          <h1 className="text-2xl font-bold tracking-tighter leading-none text-gray-900">
+            Vadeli<span className="text-blue-600">İletişim</span>
+          </h1>
+          <span className="text-[10px] text-gray-500 font-medium tracking-widest uppercase">Teknoloji Store</span>
+        </div>
+      </Link>
+      <Link href="/" className="text-sm font-medium text-gray-600 hover:text-blue-600">
+        Siteye Dön
+      </Link>
+    </div>
+  </header>
+);
 
 export default function AdminPanel() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -243,8 +265,10 @@ export default function AdminPanel() {
     }
   };
 
-  const deleteCategory = async (categoryId: string) => {
+  const deleteCategory = async (categoryId: string | number) => {
     if (!confirm('Bu kategoriyi silmek istediğinizden emin misiniz?')) return;
+
+    console.log(`Kategori siliniyor: ${categoryId}`);
 
     try {
       const response = await fetch(`/api/categories/${categoryId}`, {
@@ -255,7 +279,17 @@ export default function AdminPanel() {
         setCategories(categories.filter(c => c.id !== categoryId));
         alert('Kategori başarıyla silindi!');
       } else {
-        alert('Kategori silinirken hata oluştu!');
+        let errorMessage = 'Kategori silinirken bir hata oluştu.';
+        try {
+          const data = await response.json();
+          if (data && data.error) errorMessage = data.error;
+        } catch (e) {
+          if (response.status === 404) {
+            errorMessage = "Kategori silme servisi bulunamadı (404).";
+          }
+        }
+        console.error('Silme hatası:', errorMessage);
+        alert(errorMessage);
       }
     } catch (error) {
       console.error('Error deleting category:', error);
@@ -281,7 +315,7 @@ export default function AdminPanel() {
     }
   };
 
-  const updateCategory = async (categoryId: string, categoryData: Partial<Category>) => {
+  const updateCategory = async (categoryId: string | number, categoryData: Partial<Category>) => {
     try {
       const response = await fetch(`/api/categories/${categoryId}`, {
         method: 'PATCH',
@@ -344,7 +378,7 @@ export default function AdminPanel() {
   if (!isAuthenticated) {
     return (
       <div>
-        <Header />
+        <SimpleHeader />
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
             <h1 className="text-2xl font-bold mb-6 text-center">Admin Girişi</h1>
@@ -380,7 +414,7 @@ export default function AdminPanel() {
 
   return (
     <div>
-      <Header />
+      <SimpleHeader />
       <div className="min-h-screen bg-gray-50/50">
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col lg:flex-row gap-8">

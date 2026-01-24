@@ -21,6 +21,7 @@ export default function Profil() {
   const [newAddress, setNewAddress] = useState({
     title: '',
     fullName: '',
+    phone: '',
     country: 'Türkiye',
     city: '',
     district: '',
@@ -94,6 +95,7 @@ export default function Profil() {
         userId: user.uid,
         title: newAddress.title,
         fullName: newAddress.fullName,
+        phone: newAddress.phone,
         country: newAddress.country,
         city: newAddress.city,
         district: newAddress.district,
@@ -102,7 +104,7 @@ export default function Profil() {
         invoiceType: newAddress.invoiceType,
         createdAt: new Date().toISOString()
       });
-      setNewAddress({ title: '', fullName: '', country: 'Türkiye', city: '', district: '', content: '', postalCode: '', invoiceType: 'Bireysel' });
+      setNewAddress({ title: '', fullName: '', phone: '', country: 'Türkiye', city: '', district: '', content: '', postalCode: '', invoiceType: 'Bireysel' });
       setShowAddAddress(false);
       alert('Adres başarıyla eklendi.');
     } catch (error) {
@@ -268,6 +270,16 @@ export default function Profil() {
                       />
                     </div>
                     <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Telefon</label>
+                      <input
+                        type="tel"
+                        value={newAddress.phone}
+                        onChange={(e) => setNewAddress({...newAddress, phone: e.target.value})}
+                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="05XX XXX XX XX"
+                      />
+                    </div>
+                    <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Ülke Seçin*</label>
                       <select
                         className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
@@ -368,6 +380,7 @@ export default function Profil() {
                   </div>
                   <p className="text-sm text-gray-600 leading-relaxed">
                     {addr.fullName && <span className="font-medium block">{addr.fullName}</span>}
+                    {addr.phone && <span className="block text-gray-500 text-xs mb-1">{addr.phone}</span>}
                     {addr.content}<br/>
                     {addr.district && addr.city ? `${addr.district} / ${addr.city}` : ''}
                     {addr.country ? ` - ${addr.country}` : ''}
