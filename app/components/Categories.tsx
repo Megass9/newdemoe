@@ -1,57 +1,59 @@
+import { Smartphone, Shield, Zap, Headphones, Tablet, Wrench, ArrowRight } from 'lucide-react';
+
 const categories = [
   {
     id: 1,
-    name: 'Elektronik',
+    name: 'Akıllı Telefonlar',
     image: '/placeholder.jpg',
-    icon: '💻',
-    description: 'En yeni teknoloji ürünleri',
-    color: 'from-blue-500 to-cyan-500'
+    icon: <Smartphone className="w-6 h-6" strokeWidth={1.5} />,
+    description: 'En yeni model cep telefonları',
+    color: 'from-blue-600 to-blue-400'
   },
   {
     id: 2,
-    name: 'Giyim',
+    name: 'Kılıf & Kapak',
     image: '/placeholder.jpg',
-    icon: '👕',
-    description: 'Moda ve stil ürünleri',
-    color: 'from-pink-500 to-rose-500'
+    icon: <Shield className="w-6 h-6" strokeWidth={1.5} />,
+    description: 'Telefonunuz için şık koruma',
+    color: 'from-slate-500 to-gray-400'
   },
   {
     id: 3,
-    name: 'Ev & Yaşam',
+    name: 'Şarj & Kablo',
     image: '/placeholder.jpg',
-    icon: '🏠',
-    description: 'Ev dekorasyonu ürünleri',
-    color: 'from-green-500 to-emerald-500'
+    icon: <Zap className="w-6 h-6" strokeWidth={1.5} />,
+    description: 'Hızlı şarj aletleri ve kablolar',
+    color: 'from-cyan-600 to-blue-500'
   },
   {
     id: 4,
-    name: 'Spor & Outdoor',
+    name: 'Kulaklık & Ses',
     image: '/placeholder.jpg',
-    icon: '⚽',
-    description: 'Spor malzemeleri',
-    color: 'from-orange-500 to-red-500'
+    icon: <Headphones className="w-6 h-6" strokeWidth={1.5} />,
+    description: 'Bluetooth kulaklık ve hoparlörler',
+    color: 'from-indigo-600 to-blue-500'
   },
   {
     id: 5,
-    name: 'Kitap & Eğitim',
+    name: 'Ekran Koruyucu',
     image: '/placeholder.jpg',
-    icon: '📚',
-    description: 'Kitaplar ve eğitim materyalleri',
-    color: 'from-purple-500 to-indigo-500'
+    icon: <Tablet className="w-6 h-6" strokeWidth={1.5} />,
+    description: 'Kırılmaz cam ve filmler',
+    color: 'from-sky-600 to-cyan-500'
   },
   {
     id: 6,
-    name: 'Kozmetik',
+    name: 'Teknik Servis',
     image: '/placeholder.jpg',
-    icon: '💄',
-    description: 'Güzellik ve bakım ürünleri',
-    color: 'from-yellow-500 to-pink-500'
+    icon: <Wrench className="w-6 h-6" strokeWidth={1.5} />,
+    description: 'Tamir ve bakım hizmetleri',
+    color: 'from-gray-600 to-slate-500'
   }
 ];
 
 export default function Categories() {
   return (
-    <section className="py-20 bg-gradient-to-br from-gray-50 to-white">
+    <section className="py-20 bg-white">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
@@ -66,7 +68,7 @@ export default function Categories() {
           {categories.map((category, index) => (
             <div
               key={category.id}
-              className="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-3 transition-all duration-500 overflow-hidden cursor-pointer animate-fade-in-up"
+              className="group relative bg-white rounded-2xl border border-gray-100 hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
               style={{ animationDelay: `${index * 150}ms` }}
             >
               {/* Background Gradient */}
@@ -79,16 +81,15 @@ export default function Categories() {
                   alt={category.name}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300"></div>
-
-                {/* Icon Overlay */}
-                <div className="absolute top-4 right-4 w-12 h-12 bg-white bg-opacity-90 rounded-full flex items-center justify-center shadow-lg">
-                  <span className="text-2xl">{category.icon}</span>
-                </div>
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300"></div>
               </div>
 
               {/* Content */}
               <div className="p-6">
+                <div className="mb-4 w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center text-gray-600 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors duration-300">
+                  {category.icon}
+                </div>
+
                 <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors duration-200">
                   {category.name}
                 </h3>
@@ -98,11 +99,11 @@ export default function Categories() {
 
                 {/* Hover Arrow */}
                 <div className="flex items-center justify-between">
-                  <span className="text-indigo-600 font-semibold group-hover:translate-x-2 transition-transform duration-200">
-                    Keşfet →
+                  <span className="text-indigo-600 font-semibold group-hover:translate-x-2 transition-transform duration-200 flex items-center gap-1">
+                    Keşfet <ArrowRight className="w-4 h-4" />
                   </span>
                   <div className={`w-8 h-8 bg-gradient-to-r ${category.color} rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300`}>
-                    <span className="text-white text-sm">→</span>
+                    <ArrowRight className="w-4 h-4 text-white" />
                   </div>
                 </div>
               </div>
@@ -120,7 +121,7 @@ export default function Categories() {
           <p className="text-gray-600 mb-6">
             Daha fazla kategori ve ürün için keşfetmeye devam edin
           </p>
-          <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-3 rounded-full font-semibold hover:from-indigo-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl">
+          <button className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-full font-semibold hover:from-blue-700 hover:to-indigo-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl">
             Tüm Kategorileri Gör
           </button>
         </div>

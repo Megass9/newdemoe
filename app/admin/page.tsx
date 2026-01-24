@@ -4,6 +4,26 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import {
+  LayoutDashboard,
+  ShoppingBag,
+  Package,
+  LogOut,
+  Search,
+  Plus,
+  Edit,
+  Trash2,
+  X,
+  Loader2,
+  TrendingUp,
+  Users,
+  DollarSign,
+  Calendar,
+  CheckCircle,
+  Clock,
+  Truck,
+  XCircle
+} from 'lucide-react';
 
 interface Order {
   id: number;
@@ -46,13 +66,14 @@ interface Category {
 export default function AdminPanel() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
-  const [activeTab, setActiveTab] = useState('orders');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -241,6 +262,26 @@ export default function AdminPanel() {
     return colorMap[status] || 'bg-gray-100 text-gray-800';
   };
 
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'DELIVERED': return <CheckCircle className="w-4 h-4" />;
+      case 'SHIPPED': return <Truck className="w-4 h-4" />;
+      case 'PROCESSING': return <Loader2 className="w-4 h-4 animate-spin" />;
+      case 'CANCELLED': return <XCircle className="w-4 h-4" />;
+      default: return <Clock className="w-4 h-4" />;
+    }
+  };
+
+  const filteredOrders = orders.filter(order =>
+    order.id.toString().includes(searchTerm) ||
+    (order.guestName && order.guestName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (order.guestEmail && order.guestEmail.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  const filteredProducts = products.filter(product =>
+    product.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   if (!isAuthenticated) {
     return (
       <div>
@@ -281,181 +322,315 @@ export default function AdminPanel() {
   return (
     <div>
       <Header />
-      <div className="container mx-auto px-4 py-16">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Admin Paneli</h1>
-          <button
-            onClick={handleLogout}
-            className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200"
-          >
-            Çıkış Yap
-          </button>
-        </div>
+      <div className="min-h-screen bg-gray-50/50">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Sidebar */}
+            <aside className="w-full lg:w-64 flex-shrink-0">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-24">
+                <div className="flex items-center gap-3 mb-8 px-2">
+                  <div className="bg-blue-600 p-2 rounded-lg">
+                    <LayoutDashboard className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="font-bold text-gray-800">Yönetim</span>
+                </div>
+                
+                <nav className="space-y-2">
+                  <button
+                    onClick={() => setActiveTab('dashboard')}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                      activeTab === 'dashboard' 
+                        ? 'bg-blue-50 text-blue-600 font-medium' 
+                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    }`}
+                  >
+                    <LayoutDashboard className="w-5 h-5" />
+                    Genel Bakış
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('orders')}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                      activeTab === 'orders' 
+                        ? 'bg-blue-50 text-blue-600 font-medium' 
+                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    }`}
+                  >
+                    <ShoppingBag className="w-5 h-5" />
+                    Siparişler
+                    <span className="ml-auto bg-gray-100 text-gray-600 text-xs py-0.5 px-2 rounded-full">
+                      {orders.length}
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('products')}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                      activeTab === 'products' 
+                        ? 'bg-blue-50 text-blue-600 font-medium' 
+                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    }`}
+                  >
+                    <Package className="w-5 h-5" />
+                    Ürünler
+                    <span className="ml-auto bg-gray-100 text-gray-600 text-xs py-0.5 px-2 rounded-full">
+                      {products.length}
+                    </span>
+                  </button>
+                </nav>
 
-        {/* Tab Navigation */}
-        <div className="flex border-b mb-8 bg-white rounded-t-lg">
-          <button
-            onClick={() => setActiveTab('orders')}
-            className={`px-6 py-4 font-medium transition-colors duration-200 border-b-2 ${
-              activeTab === 'orders'
-                ? 'border-indigo-600 text-indigo-600 bg-indigo-50'
-                : 'border-transparent text-gray-600 hover:text-indigo-600 hover:bg-gray-50'
-            }`}
-          >
-            📦 Siparişler ({orders.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('products')}
-            className={`px-6 py-4 font-medium transition-colors duration-200 border-b-2 ${
-              activeTab === 'products'
-                ? 'border-indigo-600 text-indigo-600 bg-indigo-50'
-                : 'border-transparent text-gray-600 hover:text-indigo-600 hover:bg-gray-50'
-            }`}
-          >
-            🛍️ Ürünler ({products.length})
-          </button>
-        </div>
-
-        {/* Tab Content */}
-        {activeTab === 'orders' && (
-          <div className="bg-white p-6 rounded-b-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4">Siparişler</h2>
-
-            {loading ? (
-              <div className="text-center py-8">Yükleniyor...</div>
-            ) : orders.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                Henüz sipariş yok.
+                <div className="mt-8 pt-8 border-t border-gray-100">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-all duration-200"
+                  >
+                    <LogOut className="w-5 h-5" />
+                    Çıkış Yap
+                  </button>
+                </div>
               </div>
-            ) : (
-              <div className="space-y-4">
-                {orders.map(order => (
-                  <div key={order.id} className="border rounded p-4">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="font-medium text-lg">Sipariş #{order.id}</h3>
-                        <p className="text-sm text-gray-600">
-                          {new Date(order.createdAt).toLocaleDateString('tr-TR')} {new Date(order.createdAt).toLocaleTimeString('tr-TR')}
-                        </p>
-                        {order.userId ? (
-                          <p className="text-sm text-gray-600">Kullanıcı ID: {order.userId}</p>
-                        ) : (
-                          <div className="text-sm text-gray-600">
-                            <p>Misafir: {order.guestName}</p>
-                            <p>Email: {order.guestEmail}</p>
-                            <p>Telefon: {order.guestPhone}</p>
-                          </div>
-                        )}
+            </aside>
+
+            {/* Main Content */}
+            <main className="flex-1">
+              {/* Dashboard Tab */}
+              {activeTab === 'dashboard' && (
+                <div className="space-y-6">
+                  <h2 className="text-2xl font-bold text-gray-800">Genel Bakış</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="bg-green-100 p-3 rounded-xl">
+                          <DollarSign className="w-6 h-6 text-green-600" />
+                        </div>
+                        <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">+12%</span>
                       </div>
-                      <div className="text-right">
-                        <p className="font-medium text-lg">{order.total} TL</p>
-                        <span className={`text-sm px-2 py-1 rounded ${getStatusColor(order.status)}`}>
-                          {getStatusText(order.status)}
-                        </span>
-                      </div>
+                      <p className="text-gray-500 text-sm font-medium">Toplam Gelir</p>
+                      <h3 className="text-2xl font-bold text-gray-900 mt-1">
+                        {orders.reduce((acc, order) => acc + order.total, 0).toLocaleString('tr-TR')} TL
+                      </h3>
                     </div>
 
-                    <div className="mb-4">
-                      <h4 className="font-medium mb-2">Ürünler:</h4>
-                      <div className="space-y-1">
-                        {order.items.map((item, index) => (
-                          <div key={index} className="flex justify-between text-sm">
-                            <span>{item.product.name} x{item.quantity}</span>
-                            <span>{item.price * item.quantity} TL</span>
-                          </div>
-                        ))}
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="bg-blue-100 p-3 rounded-xl">
+                          <ShoppingBag className="w-6 h-6 text-blue-600" />
+                        </div>
                       </div>
+                      <p className="text-gray-500 text-sm font-medium">Toplam Sipariş</p>
+                      <h3 className="text-2xl font-bold text-gray-900 mt-1">{orders.length}</h3>
                     </div>
 
-                    <div className="flex gap-2">
-                      <select
-                        value={order.status}
-                        onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                        className="px-3 py-1 border border-gray-300 rounded text-sm"
-                      >
-                        <option value="PENDING">Bekliyor</option>
-                        <option value="PROCESSING">Hazırlanıyor</option>
-                        <option value="SHIPPED">Kargoda</option>
-                        <option value="DELIVERED">Teslim Edildi</option>
-                        <option value="CANCELLED">İptal Edildi</option>
-                      </select>
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="bg-purple-100 p-3 rounded-xl">
+                          <Package className="w-6 h-6 text-purple-600" />
+                        </div>
+                      </div>
+                      <p className="text-gray-500 text-sm font-medium">Aktif Ürünler</p>
+                      <h3 className="text-2xl font-bold text-gray-900 mt-1">{products.length}</h3>
+                    </div>
+
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="bg-yellow-100 p-3 rounded-xl">
+                          <Clock className="w-6 h-6 text-yellow-600" />
+                        </div>
+                      </div>
+                      <p className="text-gray-500 text-sm font-medium">Bekleyen Siparişler</p>
+                      <h3 className="text-2xl font-bold text-gray-900 mt-1">
+                        {orders.filter(o => o.status === 'PENDING').length}
+                      </h3>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+                </div>
+              )}
 
-        {activeTab === 'products' && (
-          <div className="bg-white p-6 rounded-b-lg shadow-md">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold">Ürünler</h2>
-              <button
-                onClick={() => setShowAddProduct(true)}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
-              >
-                ➕ Ürün Ekle
-              </button>
-            </div>
-
-            {products.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                Henüz ürün yok.
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {products.map(product => (
-                  <div key={product.id} className="border rounded-lg p-4 hover:shadow-lg transition-shadow duration-200">
-                    <img
-                      src={product.images[0] || '/placeholder.jpg'}
-                      alt={product.name}
-                      className="w-full h-32 object-cover rounded mb-3"
-                    />
-                    <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
-                    <p className="text-indigo-600 font-bold text-xl mb-2">{product.price} TL</p>
-                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description || 'Açıklama yok'}</p>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setEditingProduct(product)}
-                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm font-medium transition-colors duration-200"
-                      >
-                        ✏️ Düzenle
-                      </button>
-                      <button
-                        onClick={() => deleteProduct(product.id)}
-                        className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm font-medium transition-colors duration-200"
-                      >
-                        🗑️ Sil
-                      </button>
+              {/* Orders Tab */}
+              {activeTab === 'orders' && (
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                  <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <h2 className="text-xl font-bold text-gray-800">Siparişler</h2>
+                    <div className="relative w-full sm:w-64">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <input
+                        type="text"
+                        placeholder="Sipariş ara..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                      />
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
+
+                  {loading ? (
+                    <div className="flex justify-center items-center py-12">
+                      <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+                    </div>
+                  ) : filteredOrders.length === 0 ? (
+                    <div className="text-center py-12 text-gray-500">
+                      Sipariş bulunamadı.
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left">
+                        <thead className="bg-gray-50 text-gray-600 text-xs uppercase font-semibold">
+                          <tr>
+                            <th className="px-6 py-4">Sipariş No</th>
+                            <th className="px-6 py-4">Müşteri</th>
+                            <th className="px-6 py-4">Tarih</th>
+                            <th className="px-6 py-4">Tutar</th>
+                            <th className="px-6 py-4">Durum</th>
+                            <th className="px-6 py-4">İşlemler</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                          {filteredOrders.map(order => (
+                            <tr key={order.id} className="hover:bg-gray-50/50 transition-colors">
+                              <td className="px-6 py-4 font-medium text-gray-900">#{order.id}</td>
+                              <td className="px-6 py-4">
+                                <div className="flex flex-col">
+                                  <span className="font-medium text-gray-900">
+                                    {order.guestName || `Kullanıcı ${order.userId}`}
+                                  </span>
+                                  <span className="text-xs text-gray-500">
+                                    {order.guestEmail}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-600">
+                                <div className="flex items-center gap-2">
+                                  <Calendar className="w-4 h-4 text-gray-400" />
+                                  {new Date(order.createdAt).toLocaleDateString('tr-TR')}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 font-medium text-gray-900">
+                                {order.total.toLocaleString('tr-TR')} TL
+                              </td>
+                              <td className="px-6 py-4">
+                                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                                  {getStatusIcon(order.status)}
+                                  {getStatusText(order.status)}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4">
+                                <select
+                                  value={order.status}
+                                  onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                                  className="bg-white border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                >
+                                  <option value="PENDING">Bekliyor</option>
+                                  <option value="PROCESSING">Hazırlanıyor</option>
+                                  <option value="SHIPPED">Kargoda</option>
+                                  <option value="DELIVERED">Teslim Edildi</option>
+                                  <option value="CANCELLED">İptal Edildi</option>
+                                </select>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Products Tab */}
+              {activeTab === 'products' && (
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                    <div className="relative w-full sm:w-96">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <input
+                        type="text"
+                        placeholder="Ürün ara..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                      />
+                    </div>
+                    <button
+                      onClick={() => setShowAddProduct(true)}
+                      className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-blue-600/20"
+                    >
+                      <Plus className="w-5 h-5" />
+                      Yeni Ürün
+                    </button>
+                  </div>
+
+                  {filteredProducts.length === 0 ? (
+                    <div className="text-center py-12 text-gray-500 bg-white rounded-2xl border border-gray-100">
+                      Ürün bulunamadı.
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                      {filteredProducts.map(product => (
+                        <div key={product.id} className="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300">
+                          <div className="relative aspect-square overflow-hidden bg-gray-100">
+                            <img
+                              src={product.images[0] || '/placeholder.jpg'}
+                              alt={product.name}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                              <button
+                                onClick={() => setEditingProduct(product)}
+                                className="bg-white text-gray-900 p-2 rounded-full hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                                title="Düzenle"
+                              >
+                                <Edit className="w-5 h-5" />
+                              </button>
+                              <button
+                                onClick={() => deleteProduct(product.id)}
+                                className="bg-white text-gray-900 p-2 rounded-full hover:bg-red-50 hover:text-red-600 transition-colors"
+                                title="Sil"
+                              >
+                                <Trash2 className="w-5 h-5" />
+                              </button>
+                            </div>
+                          </div>
+                          <div className="p-4">
+                            <div className="flex justify-between items-start mb-2">
+                              <h3 className="font-semibold text-gray-900 line-clamp-1" title={product.name}>{product.name}</h3>
+                              <span className="font-bold text-blue-600">{product.price} ₺</span>
+                            </div>
+                            <p className="text-sm text-gray-500 line-clamp-2 mb-3 h-10">
+                              {product.description || 'Açıklama yok'}
+                            </p>
+                            <div className="flex items-center justify-between text-xs text-gray-400 border-t border-gray-50 pt-3">
+                              <span>Stok: {product.stock || 0}</span>
+                              <span>{product.category?.name || 'Kategorisiz'}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </main>
           </div>
-        )}
 
-        {/* Add Product Modal */}
-        {showAddProduct && (
-          <ProductForm
-            onSubmit={addProduct}
-            onCancel={() => setShowAddProduct(false)}
-            title="Yeni Ürün Ekle"
-            categories={categories}
-          />
-        )}
+          {/* Modals */}
+          {showAddProduct && (
+            <ProductForm
+              onSubmit={addProduct}
+              onCancel={() => setShowAddProduct(false)}
+              title="Yeni Ürün Ekle"
+              categories={categories}
+              onCategoryAdd={fetchCategories}
+            />
+          )}
 
-        {/* Edit Product Modal */}
-        {editingProduct && (
-          <ProductForm
-            product={editingProduct}
-            onSubmit={(data) => updateProduct(editingProduct.id, data)}
-            onCancel={() => setEditingProduct(null)}
-            title="Ürün Düzenle"
-            categories={categories}
-          />
-        )}
+          {editingProduct && (
+            <ProductForm
+              product={editingProduct}
+              onSubmit={(data) => updateProduct(editingProduct.id, data)}
+              onCancel={() => setEditingProduct(null)}
+              title="Ürün Düzenle"
+              categories={categories}
+              onCategoryAdd={fetchCategories}
+            />
+          )}
+        </div>
       </div>
       <Footer />
     </div>
@@ -469,9 +644,10 @@ interface ProductFormProps {
   onCancel: () => void;
   title: string;
   categories: Category[];
+  onCategoryAdd?: () => void;
 }
 
-function ProductForm({ product, onSubmit, onCancel, title, categories }: ProductFormProps) {
+function ProductForm({ product, onSubmit, onCancel, title, categories, onCategoryAdd }: ProductFormProps) {
   const [formData, setFormData] = useState({
     name: product?.name || '',
     price: product?.price || 0,
@@ -480,17 +656,75 @@ function ProductForm({ product, onSubmit, onCancel, title, categories }: Product
     categoryId: product?.categoryId || '',
     stock: product?.stock || 0,
   });
+  const [newImageUrl, setNewImageUrl] = useState('');
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(formData);
   };
 
+  const handleAddImage = () => {
+    if (newImageUrl.trim()) {
+      setFormData({ ...formData, images: [...formData.images, newImageUrl.trim()] });
+      setNewImageUrl('');
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setFormData({ ...formData, images: formData.images.filter((_, i) => i !== index) });
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          setFormData(prev => ({ ...prev, images: [...prev.images, reader.result as string] }));
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleAddCategory = async () => {
+    if (!newCategoryName.trim()) return;
+
+    try {
+      const res = await fetch('/api/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newCategoryName }),
+      });
+
+      if (res.ok) {
+        const newCategory = await res.json();
+        setNewCategoryName('');
+        setIsAddingCategory(false);
+        if (onCategoryAdd) onCategoryAdd();
+        if (newCategory && newCategory.id) {
+          setFormData(prev => ({ ...prev, categoryId: newCategory.id }));
+        }
+        alert('Kategori eklendi!');
+      } else {
+        alert('Kategori eklenirken hata oluştu.');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Hata oluştu.');
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
-        <h3 className="text-xl font-bold mb-4">{title}</h3>
-        <form onSubmit={handleSubmit}>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-6 border-b border-gray-100">
+          <h3 className="text-xl font-bold text-gray-900">{title}</h3>
+          <button onClick={onCancel} className="text-gray-400 hover:text-gray-600 transition-colors"><X className="w-6 h-6" /></button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6">
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Ürün Adı</label>
@@ -498,7 +732,7 @@ function ProductForm({ product, onSubmit, onCancel, title, categories }: Product
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                 required
               />
             </div>
@@ -508,7 +742,7 @@ function ProductForm({ product, onSubmit, onCancel, title, categories }: Product
                 type="number"
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                 required
                 min="0"
                 step="0.01"
@@ -519,23 +753,91 @@ function ProductForm({ product, onSubmit, onCancel, title, categories }: Product
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                 rows={3}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
-              <select
-                value={formData.categoryId}
-                onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                required
-              >
-                <option value="">Kategori Seçin</option>
-                {categories.map(cat => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Görseller (URL veya Dosya)</label>
+              <div className="flex gap-2 mb-2">
+                <input
+                  type="text"
+                  value={newImageUrl}
+                  onChange={(e) => setNewImageUrl(e.target.value)}
+                  className="flex-1 px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
+                  placeholder="https://..."
+                />
+                <button
+                  type="button"
+                  onClick={handleAddImage}
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-md transition-colors text-sm font-medium"
+                >
+                  URL Ekle
+                </button>
+              </div>
+              <div className="mb-2">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                />
+              </div>
+              <div className="grid grid-cols-4 gap-3">
+                {formData.images.map((img, index) => (
+                  <div key={index} className="relative group border border-gray-200 rounded-xl overflow-hidden h-24 bg-gray-50">
+                    <img src={img} alt={`Görsel ${index + 1}`} className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(index)}
+                      className="absolute top-1 right-1 bg-red-500 text-white w-6 h-6 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                    >
+                      ✕
+                    </button>
+                  </div>
                 ))}
-              </select>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+              <div className="flex gap-2">
+                <select
+                  value={formData.categoryId}
+                  onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+                  className="flex-1 px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                  required
+                >
+                  <option value="">Kategori Seçin</option>
+                  {categories.map(cat => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => setIsAddingCategory(!isAddingCategory)}
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-md transition-colors text-sm font-medium"
+                >
+                  {isAddingCategory ? 'İptal' : '+'}
+                </button>
+              </div>
+              {isAddingCategory && (
+                <div className="mt-2 flex gap-2">
+                  <input
+                    type="text"
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    placeholder="Yeni Kategori Adı"
+                    className="flex-1 px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddCategory}
+                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-md transition-colors text-sm font-medium"
+                  >
+                    Ekle
+                  </button>
+                </div>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Stok</label>
@@ -543,24 +845,24 @@ function ProductForm({ product, onSubmit, onCancel, title, categories }: Product
                 type="number"
                 value={formData.stock}
                 onChange={(e) => setFormData({ ...formData, stock: Number(e.target.value) })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                 min="0"
               />
             </div>
           </div>
-          <div className="flex gap-3 mt-6">
-            <button
-              type="submit"
-              className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200"
-            >
-              Kaydet
-            </button>
+          <div className="flex gap-3 mt-8 pt-6 border-t border-gray-100">
             <button
               type="button"
               onClick={onCancel}
-              className="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200"
+              className="flex-1 bg-white border border-gray-200 text-gray-700 py-3 px-4 rounded-xl font-medium hover:bg-gray-50 transition-colors"
             >
               İptal
+            </button>
+            <button
+              type="submit"
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-xl font-medium shadow-lg shadow-blue-600/20 transition-all"
+            >
+              Kaydet
             </button>
           </div>
         </form>

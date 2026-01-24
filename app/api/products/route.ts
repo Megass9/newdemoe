@@ -1,46 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '../../lib/prisma';
+import { prisma } from '../../../lib/prisma';
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const category = searchParams.get('category');
-    const sort = searchParams.get('sort');
-
-    let where: any = {};
-    if (category && category !== 'all') {
-      where.category = {
-        name: category
-      };
-    }
-
-    let orderBy: any = {};
-    if (sort === 'price-asc') {
-      orderBy.price = 'asc';
-    } else if (sort === 'price-desc') {
-      orderBy.price = 'desc';
-    } else if (sort === 'newest') {
-      orderBy.id = 'desc';
-    }
-
     const products = await prisma.product.findMany({
-      where,
-      orderBy,
-      include: {
-        category: true
-      }
+      include: { category: true },
+      orderBy: { createdAt: 'desc' }
     });
 
-    // Transform images and specs from JSON strings
-    const transformedProducts = products.map(product => ({
+    // Resimleri JSON string'den array'e çevir
+    const parsedProducts = products.map(product => ({
       ...product,
-      images: JSON.parse(product.images),
-      specs: product.specs ? JSON.parse(product.specs) : null
+      images: product.images ? JSON.parse(product.images) : []
     }));
 
-    return NextResponse.json(transformedProducts);
+    return NextResponse.json(parsedProducts);
   } catch (error) {
-    console.error('Error fetching products:', error);
+    console.error('Ürünleri getirme hatası:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -48,32 +24,22 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, price, description, images, categoryId, stock } = body;
+    const { name, description, price, stock, categoryId, images } = body;
 
     const product = await prisma.product.create({
       data: {
         name,
-        price: parseFloat(price),
         description,
-        images: JSON.stringify(images || ['/placeholder.jpg']),
-        specs: JSON.stringify({}),
-        categoryId: categoryId ? parseInt(categoryId) : null,
-        stock: parseInt(stock) || 0,
+        price: parseFloat(price),
+        stock: parseInt(stock),
+        categoryId: parseInt(categoryId),
+        images: JSON.stringify(images || []), // Array'i string olarak sakla
       },
-      include: {
-        category: true
-      }
     });
 
-    const transformedProduct = {
-      ...product,
-      images: JSON.parse(product.images),
-      specs: product.specs ? JSON.parse(product.specs) : null
-    };
-
-    return NextResponse.json(transformedProduct);
+    return NextResponse.json(product, { status: 201 });
   } catch (error) {
-    console.error('Error creating product:', error);
-    return NextResponse.json({ error: 'Ürün oluşturulamadı' }, { status: 500 });
+    console.error('Ürün ekleme hatası:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

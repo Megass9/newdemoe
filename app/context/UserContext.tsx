@@ -1,80 +1,87 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-interface User {
-  id: number;
-  name: string;
-  email: string;
-}
+import { createContext, useContext, useEffect, useState } from 'react';
+import { 
+  onAuthStateChanged, 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  signOut,
+  updateProfile,
+  User
+} from 'firebase/auth';
+import { auth } from './firebase';
 
 interface UserContextType {
   user: User | null;
+  loading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   register: (name: string, email: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>;
   isLoggedIn: boolean;
 }
 
-const UserContext = createContext<UserContextType | undefined>(undefined);
+const UserContext = createContext<UserContextType>({} as UserContextType);
 
-export function UserProvider({ children }: { children: ReactNode }) {
+export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
+  // Oturum durumunu dinle
   useEffect(() => {
-    // Check if user is logged in from localStorage
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    // Mock login - in real app, this would call an API
-    if (email && password) {
-      const mockUser = { id: 1, name: 'Test User', email };
-      setUser(mockUser);
-      localStorage.setItem('user', JSON.stringify(mockUser));
+  const login = async (email: string, password: string) => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
       return true;
+    } catch (error) {
+      console.error('Giriş hatası:', error);
+      return false;
     }
-    return false;
   };
 
-  const register = async (name: string, email: string, password: string): Promise<boolean> => {
-    // Mock register
-    if (name && email && password) {
-      const mockUser = { id: Date.now(), name, email };
-      setUser(mockUser);
-      localStorage.setItem('user', JSON.stringify(mockUser));
+  const register = async (name: string, email: string, password: string) => {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      // Kullanıcı oluşturulduktan sonra ismini güncelle
+      await updateProfile(userCredential.user, {
+        displayName: name
+      });
+      // State'i manuel güncelle (displayName hemen yansısın diye)
+      setUser({ ...userCredential.user, displayName: name });
       return true;
+    } catch (error) {
+      console.error('Kayıt hatası:', error);
+      return false;
     }
-    return false;
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
-  };
-
-  const value = {
-    user,
-    login,
-    register,
-    logout,
-    isLoggedIn: !!user
+  const logout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error('Çıkış hatası:', error);
+    }
   };
 
   return (
-    <UserContext.Provider value={value}>
+    <UserContext.Provider value={{ 
+      user, 
+      loading, 
+      login, 
+      register, 
+      logout,
+      isLoggedIn: !!user 
+    }}>
       {children}
     </UserContext.Provider>
   );
 }
 
-export function useUser() {
-  const context = useContext(UserContext);
-  if (context === undefined) {
-    throw new Error('useUser must be used within a UserProvider');
-  }
-  return context;
-}
+export const useUser = () => useContext(UserContext);

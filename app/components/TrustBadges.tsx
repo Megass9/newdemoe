@@ -1,40 +1,42 @@
+import { Truck, RotateCcw, Lock, Star, MessageCircle, Trophy } from 'lucide-react';
+
 export default function TrustBadges() {
   const badges = [
     {
-      icon: "🚚",
+      icon: <Truck className="w-8 h-8 text-white" />,
       title: "Hızlı Kargo",
       description: "Ücretsiz ve hızlı teslimat",
+      color: "from-blue-600 to-blue-400"
+    },
+    {
+      icon: <RotateCcw className="w-8 h-8 text-white" />,
+      title: "Kolay İade",
+      description: "30 gün içinde ücretsiz iade",
+      color: "from-slate-500 to-gray-400"
+    },
+    {
+      icon: <Lock className="w-8 h-8 text-white" />,
+      title: "Güvenli Ödeme",
+      description: "SSL korumalı güvenli alışveriş",
       color: "from-blue-500 to-cyan-500"
     },
     {
-      icon: "🔄",
-      title: "Kolay İade",
-      description: "30 gün içinde ücretsiz iade",
-      color: "from-green-500 to-emerald-500"
+      icon: <Star className="w-8 h-8 text-white" />,
+      title: "Orijinal Ürün",
+      description: "Garantili ve orijinal cihazlar",
+      color: "from-gray-600 to-slate-500"
     },
     {
-      icon: "🔒",
-      title: "Güvenli Ödeme",
-      description: "SSL korumalı güvenli alışveriş",
-      color: "from-purple-500 to-pink-500"
-    },
-    {
-      icon: "⭐",
-      title: "Premium Kalite",
-      description: "Orijinal ve garantili ürünler",
-      color: "from-yellow-500 to-orange-500"
-    },
-    {
-      icon: "💬",
+      icon: <MessageCircle className="w-8 h-8 text-white" />,
       title: "7/24 Destek",
       description: "Uzman müşteri hizmetleri",
-      color: "from-indigo-500 to-purple-500"
+      color: "from-indigo-600 to-blue-500"
     },
     {
-      icon: "🏆",
+      icon: <Trophy className="w-8 h-8 text-white" />,
       title: "Müşteri Memnuniyeti",
       description: "%98 olumlu müşteri yorumu",
-      color: "from-red-500 to-pink-500"
+      color: "from-sky-600 to-cyan-500"
     }
   ];
 
@@ -58,10 +60,10 @@ export default function TrustBadges() {
               style={{ animationDelay: `${index * 100}ms` }}
             >
               <div className={`w-16 h-16 bg-gradient-to-br ${badge.color} rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
-                <span className="text-3xl">{badge.icon}</span>
+                {badge.icon}
               </div>
 
-              <h3 className="text-xl font-bold text-gray-900 mb-3 text-center group-hover:text-indigo-600 transition-colors duration-200">
+              <h3 className="text-xl font-bold text-gray-900 mb-3 text-center group-hover:text-blue-600 transition-colors duration-200">
                 {badge.title}
               </h3>
 
@@ -78,23 +80,23 @@ export default function TrustBadges() {
         </div>
 
         {/* Stats Section */}
-        <div className="mt-20 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-3xl p-8 text-white">
+        <div className="mt-20 bg-gradient-to-r from-gray-800 via-blue-800 to-gray-800 rounded-3xl p-8 text-white">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div className="animate-fade-in-up">
               <div className="text-4xl font-bold mb-2">10K+</div>
-              <div className="text-indigo-100">Mutlu Müşteri</div>
+              <div className="text-blue-100">Mutlu Müşteri</div>
             </div>
             <div className="animate-fade-in-up animation-delay-200">
               <div className="text-4xl font-bold mb-2">50K+</div>
-              <div className="text-indigo-100">Satılan Ürün</div>
+              <div className="text-blue-100">Satılan Ürün</div>
             </div>
             <div className="animate-fade-in-up animation-delay-400">
               <div className="text-4xl font-bold mb-2">4.9/5</div>
-              <div className="text-indigo-100">Müşteri Puanı</div>
+              <div className="text-blue-100">Müşteri Puanı</div>
             </div>
             <div className="animate-fade-in-up animation-delay-1000">
               <div className="text-4xl font-bold mb-2">24/7</div>
-              <div className="text-indigo-100">Destek</div>
+              <div className="text-blue-100">Destek</div>
             </div>
           </div>
         </div>

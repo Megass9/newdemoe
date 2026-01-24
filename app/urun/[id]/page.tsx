@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useCart } from '../../context/CartContext';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
+import { ShoppingCart, Star, Heart, Share2, Truck, RotateCcw, Settings, Check, X, Search, ChevronRight, Minus, Plus } from 'lucide-react';
 
 interface Product {
   id: number;
@@ -86,7 +87,7 @@ export default function UrunDetay() {
         <Header />
         <div className="container mx-auto px-4 py-20">
           <div className="text-center">
-            <div className="text-6xl mb-4">🔍</div>
+            <Search className="w-20 h-20 mx-auto text-gray-300 mb-4" />
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Ürün Bulunamadı</h1>
             <p className="text-gray-600 mb-6">Aradığınız ürün mevcut değil veya kaldırılmış olabilir.</p>
             <a
@@ -116,7 +117,7 @@ export default function UrunDetay() {
             </li>
             <li>
               <div className="flex items-center">
-                <span className="mx-2 text-gray-400">/</span>
+                <ChevronRight className="w-4 h-4 text-gray-400 mx-2" />
                 <span className="text-gray-500">{product.name}</span>
               </div>
             </li>
@@ -136,11 +137,11 @@ export default function UrunDetay() {
               {/* Stock Badge */}
               {product.stock > 0 ? (
                 <div className="absolute top-4 left-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-                  ✓ Stokta Var
+                  <span className="flex items-center gap-1"><Check className="w-3 h-3" /> Stokta Var</span>
                 </div>
               ) : (
                 <div className="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-                  ✗ Stokta Yok
+                  <span className="flex items-center gap-1"><X className="w-3 h-3" /> Stokta Yok</span>
                 </div>
               )}
             </div>
@@ -193,7 +194,7 @@ export default function UrunDetay() {
             <div className="flex items-center space-x-4">
               <div className="flex text-yellow-400">
                 {[...Array(5)].map((_, i) => (
-                  <span key={i} className="text-lg">⭐</span>
+                  <Star key={i} className="w-5 h-5 fill-current" />
                 ))}
               </div>
               <span className="text-gray-600">(4.8/5 - 127 değerlendirme)</span>
@@ -223,14 +224,14 @@ export default function UrunDetay() {
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
                   className="px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-50"
                 >
-                  -
+                  <Minus className="w-4 h-4" />
                 </button>
                 <span className="px-4 py-2 text-center min-w-[50px]">{quantity}</span>
                 <button
                   onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
                   className="px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-50"
                 >
-                  +
+                  <Plus className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -246,16 +247,16 @@ export default function UrunDetay() {
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
               >
-                {product.stock > 0 ? '🛒 Sepete Ekle' : 'Stokta Yok'}
+                {product.stock > 0 ? <span className="flex items-center justify-center gap-2"><ShoppingCart className="w-5 h-5" /> Sepete Ekle</span> : 'Stokta Yok'}
               </button>
 
               <div className="grid grid-cols-2 gap-3">
                 <button className="flex items-center justify-center py-3 px-4 border-2 border-gray-300 text-gray-700 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition-all duration-200">
-                  <span className="mr-2">❤️</span>
+                  <Heart className="w-5 h-5 mr-2" />
                   Favorilere Ekle
                 </button>
                 <button className="flex items-center justify-center py-3 px-4 border-2 border-gray-300 text-gray-700 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition-all duration-200">
-                  <span className="mr-2">📤</span>
+                  <Share2 className="w-5 h-5 mr-2" />
                   Paylaş
                 </button>
               </div>
@@ -265,7 +266,7 @@ export default function UrunDetay() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 border-t border-gray-200">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                  <span className="text-green-600">🚚</span>
+                  <Truck className="w-5 h-5 text-green-600" />
                 </div>
                 <div>
                   <p className="font-medium text-gray-900">Ücretsiz Kargo</p>
@@ -274,7 +275,7 @@ export default function UrunDetay() {
               </div>
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-blue-600">↩️</span>
+                  <RotateCcw className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
                   <p className="font-medium text-gray-900">Kolay İade</p>
@@ -289,7 +290,7 @@ export default function UrunDetay() {
         {product.specs && Object.keys(product.specs).length > 0 && (
           <div className="mt-16 bg-white rounded-2xl shadow-lg p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-              <span className="mr-3">⚙️</span>
+              <Settings className="w-6 h-6 mr-3 text-gray-400" />
               Teknik Özellikler
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

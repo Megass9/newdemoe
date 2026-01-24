@@ -1,44 +1,51 @@
+import { ArrowRight } from 'lucide-react';
+
 export default function Banner() {
   return (
-    <section className="relative bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 text-white py-24 overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-black bg-opacity-10">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }}></div>
-      </div>
-
-      <div className="relative container mx-auto px-4 text-center">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 animate-fade-in-up">
-            Modern Alışveriş
-            <span className="block text-yellow-300">Deneyimi</span>
-          </h1>
-          <p className="text-xl md:text-2xl mb-8 text-indigo-100 animate-fade-in-up animation-delay-200">
-            Premium ürünleri, şık tasarımları ve mükemmel fiyatları keşfedin
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up animation-delay-400">
-            <button className="bg-white text-indigo-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-100 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
-              🛍️ Alışverişe Başla
-            </button>
-            <button className="border-2 border-white text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white hover:text-indigo-600 transform hover:scale-105 transition-all duration-300">
-              📦 Ürünleri Keşfet
-            </button>
+    <section className="relative bg-gray-900 text-white overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-purple-900 opacity-90"></div>
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=2000')] bg-cover bg-center mix-blend-overlay opacity-40"></div>
+        
+        <div className="container mx-auto px-4 py-24 md:py-32 relative z-10 flex flex-col md:flex-row items-center">
+          <div className="md:w-1/2 text-center md:text-left space-y-6">
+            <div className="inline-block px-4 py-1.5 bg-blue-500/20 border border-blue-400/30 rounded-full text-blue-300 text-sm font-semibold mb-2">
+              🚀 Yeni Sezon Ürünleri Stokta
+            </div>
+            <h2 className="text-5xl md:text-7xl font-bold leading-tight tracking-tight">
+              Geleceğin <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+                Teknolojisi
+              </span>
+            </h2>
+            <p className="text-lg text-gray-300 max-w-lg mx-auto md:mx-0">
+              En yeni akıllı cihazlar, orijinal aksesuarlar ve Vadeli İletişim güvencesiyle tanışın. Hızlı kargo ve güvenli ödeme.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start pt-4">
+              <button className="bg-white text-gray-900 px-8 py-4 rounded-full font-bold hover:bg-gray-100 transition flex items-center justify-center gap-2 shadow-xl shadow-white/10">
+                Alışverişe Başla <ArrowRight className="w-5 h-5" />
+              </button>
+              <button className="px-8 py-4 rounded-full font-bold border border-white/20 hover:bg-white/10 transition backdrop-blur-sm">
+                Kategorileri Keşfet
+              </button>
+            </div>
+          </div>
+          
+          {/* Hero Image / Visual */}
+          <div className="md:w-1/2 mt-12 md:mt-0 flex justify-center relative">
+            <div className="w-72 h-96 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-[3rem] rotate-6 blur-2xl absolute opacity-40 animate-pulse"></div>
+            <div className="relative z-10 bg-white/10 backdrop-blur-xl border border-white/20 p-6 rounded-3xl shadow-2xl transform hover:-translate-y-2 transition duration-500">
+               <img 
+                 src="https://images.unsplash.com/photo-1616348436168-de43ad0db179?q=80&w=600&auto=format&fit=crop" 
+                 alt="Hero Product" 
+                 className="rounded-2xl w-64 h-80 object-cover shadow-lg"
+               />
+               <div className="absolute -bottom-6 -right-6 bg-white text-gray-900 p-4 rounded-2xl shadow-xl flex flex-col items-center">
+                  <span className="text-xs font-bold text-gray-500">Sadece</span>
+                  <span className="text-xl font-bold text-blue-600">₺84.999</span>
+               </div>
+            </div>
           </div>
         </div>
-
-        {/* Floating Elements */}
-        <div className="absolute top-10 left-10 animate-bounce">
-          <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-            <span className="text-2xl">✨</span>
-          </div>
-        </div>
-        <div className="absolute bottom-10 right-10 animate-bounce animation-delay-1000">
-          <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-            <span className="text-xl">💎</span>
-          </div>
-        </div>
-      </div>
     </section>
   );
 }

@@ -1,64 +1,62 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '../../../lib/prisma';
+import { prisma } from '../../../../lib/prisma';
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: any }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = await params;
-    const productId = parseInt(id);
-    const body = await request.json();
-    const { name, price, description, images, categoryId, stock } = body;
-
-    const updateData: any = {};
-    if (name !== undefined) updateData.name = name;
-    if (price !== undefined) updateData.price = parseFloat(price);
-    if (description !== undefined) updateData.description = description;
-    if (images !== undefined) updateData.images = JSON.stringify(images);
-    if (categoryId !== undefined) updateData.categoryId = categoryId ? parseInt(categoryId) : null;
-    if (stock !== undefined) updateData.stock = parseInt(stock);
-
-    const product = await prisma.product.update({
-      where: {
-        id: productId,
-      },
-      data: updateData,
-      include: {
-        category: true
-      }
+    const product = await prisma.product.findUnique({
+      where: { id: parseInt(params.id) },
+      include: { category: true }
     });
 
-    const transformedProduct = {
-      ...product,
-      images: JSON.parse(product.images),
-      specs: product.specs ? JSON.parse(product.specs) : null
-    };
+    if (!product) {
+      return NextResponse.json({ error: 'Ürün bulunamadı' }, { status: 404 });
+    }
 
-    return NextResponse.json(transformedProduct);
+    return NextResponse.json({
+      ...product,
+      images: product.images ? JSON.parse(product.images) : []
+    });
   } catch (error) {
-    console.error('Error updating product:', error);
-    return NextResponse.json({ error: 'Ürün güncellenemedi' }, { status: 500 });
+    return NextResponse.json({ error: 'Hata oluştu' }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: any }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = await params;
-    const productId = parseInt(id);
-
     await prisma.product.delete({
-      where: {
-        id: productId,
-      },
+      where: { id: parseInt(params.id) }
+    });
+    return NextResponse.json({ message: 'Ürün silindi' });
+  } catch (error) {
+    return NextResponse.json({ error: 'Silme işlemi başarısız' }, { status: 500 });
+  }
+}
+
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const body = await request.json();
+    const { name, price, description, images, categoryId, stock } = body;
+
+    const updateData: any = {
+      name,
+      description,
+      price: price ? parseFloat(price) : undefined,
+      stock: stock ? parseInt(stock) : undefined,
+      categoryId: categoryId ? parseInt(categoryId) : undefined,
+    };
+
+    if (images) {
+      updateData.images = JSON.stringify(images);
+    }
+
+    const product = await prisma.product.update({
+      where: { id: parseInt(params.id) },
+      data: updateData
     });
 
-    return NextResponse.json({ message: 'Ürün başarıyla silindi' });
+    return NextResponse.json(product);
   } catch (error) {
-    console.error('Error deleting product:', error);
-    return NextResponse.json({ error: 'Ürün silinemedi' }, { status: 500 });
+    console.error(error);
+    return NextResponse.json({ error: 'Güncelleme başarısız' }, { status: 500 });
   }
 }

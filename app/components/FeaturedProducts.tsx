@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useCart } from '../context/CartContext';
+import { ShoppingCart, Star, ArrowRight } from 'lucide-react';
 
 interface Product {
   id: number;
@@ -20,7 +21,11 @@ export default function FeaturedProducts() {
     fetch('/api/products')
       .then(res => res.json())
       .then(data => {
-        setProducts(data.slice(0, 3)); // İlk 3 ürünü göster
+        if (Array.isArray(data)) {
+          setProducts(data.slice(0, 4)); // Show 4 products to match grid
+        } else {
+          setProducts([]);
+        }
         setLoading(false);
       })
       .catch(error => {
@@ -30,109 +35,61 @@ export default function FeaturedProducts() {
   }, []);
 
   if (loading) {
-    return (
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Öne Çıkan Ürünler</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="bg-white shadow-md rounded-lg overflow-hidden animate-pulse">
-                <div className="w-full h-48 bg-gray-300"></div>
-                <div className="p-4">
-                  <div className="h-4 bg-gray-300 rounded mb-2"></div>
-                  <div className="h-4 bg-gray-300 rounded w-1/2"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    );
+    return <div className="py-20 text-center">Yükleniyor...</div>;
   }
 
   return (
-    <section className="py-20 bg-gray-50">
+    <section className="bg-white py-20">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">Öne Çıkan Ürünler</h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Müşterilerimizin en çok tercih ettiği premium ürünleri keşfedin
-          </p>
+        <div className="flex justify-between items-end mb-10">
+          <div>
+            <h3 className="text-3xl font-bold text-gray-900">Öne Çıkanlar</h3>
+            <p className="text-gray-500 mt-2">Bu hafta en çok satan ürünlerimiz.</p>
+          </div>
+          <Link href="/kategoriler" className="text-blue-600 font-semibold hover:text-blue-700 flex items-center gap-1">
+            Tümünü Gör <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {products.map((product, index) => (
-            <div
-              key={product.id}
-              className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 overflow-hidden group animate-fade-in-up"
-              style={{ animationDelay: `${index * 200}ms` }}
-            >
-              <div className="relative overflow-hidden">
-                <Link href={`/urun/${product.id}`}>
-                  <img
-                    src={product.images[0] || '/placeholder.jpg'}
-                    alt={product.name}
-                    className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500 cursor-pointer"
-                  />
-                </Link>
-                <div className="absolute top-4 right-4">
-                  <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                    🔥 Popüler
-                  </span>
+            <div key={product.id} className="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col">
+              <div className="relative h-64 bg-gray-100 overflow-hidden">
+                <img 
+                  src={product.images[0] || '/placeholder.jpg'} 
+                  alt={product.name} 
+                  className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
+                />
+                <div className="absolute top-3 right-3 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-gray-700 shadow-sm">
+                  Teknoloji
                 </div>
-                <div className="absolute bottom-4 left-4 flex items-center space-x-1">
-                  <div className="flex text-yellow-400">
-                    {[...Array(5)].map((_, i) => (
-                      <span key={i} className="text-lg">⭐</span>
-                    ))}
-                  </div>
-                  <span className="text-white text-sm font-medium bg-black bg-opacity-50 px-2 py-1 rounded">
-                    4.8
-                  </span>
-                </div>
+                <button 
+                  onClick={() => addToCart(product)}
+                  className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-2.5 rounded-full text-sm font-medium shadow-lg translate-y-12 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition duration-300 w-10/12 flex items-center justify-center gap-2"
+                >
+                  <ShoppingCart className="w-4 h-4" /> Sepete Ekle
+                </button>
               </div>
-
-              <div className="p-6">
-                <Link href={`/urun/${product.id}`}>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2 hover:text-indigo-600 transition-colors cursor-pointer line-clamp-2">
-                    {product.name}
-                  </h3>
-                </Link>
-
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex flex-col">
-                    <span className="text-3xl font-bold text-indigo-600">{product.price} TL</span>
-                    <span className="text-sm text-gray-500 line-through">1.299 TL</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-green-600 font-semibold text-sm">17% İndirim</span>
-                  </div>
+              
+              <div className="p-5 flex-1 flex flex-col">
+                <div className="flex items-center gap-1 text-yellow-400 mb-2">
+                  <Star className="w-4 h-4 fill-current" />
+                  <Star className="w-4 h-4 fill-current" />
+                  <Star className="w-4 h-4 fill-current" />
+                  <Star className="w-4 h-4 fill-current" />
+                  <Star className="w-4 h-4 fill-current text-gray-300" />
+                  <span className="text-xs text-gray-400 ml-1">(4.2)</span>
                 </div>
-
-                <div className="flex space-x-3">
-                  <button
-                    onClick={() => addToCart(product)}
-                    className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
-                  >
-                    🛒 Sepete Ekle
-                  </button>
-                  <button className="p-3 border-2 border-gray-200 rounded-xl hover:border-indigo-300 hover:bg-indigo-50 transition-all duration-200 group">
-                    <span className="text-gray-400 group-hover:text-indigo-600">❤️</span>
-                  </button>
+                <Link href={`/urun/${product.id}`}>
+                    <h4 className="font-bold text-lg text-gray-800 mb-1 group-hover:text-blue-600 transition">{product.name}</h4>
+                </Link>
+                <div className="mt-auto pt-4 flex items-center justify-between border-t border-gray-50">
+                  <span className="text-xl font-bold text-gray-900">₺{product.price}</span>
+                  <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full font-medium">Ücretsiz Kargo</span>
                 </div>
               </div>
             </div>
           ))}
-        </div>
-
-        <div className="text-center mt-12">
-          <Link
-            href="/kategoriler"
-            className="inline-flex items-center px-8 py-4 bg-white border-2 border-indigo-600 text-indigo-600 rounded-full font-semibold hover:bg-indigo-600 hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl"
-          >
-            Tüm Ürünleri Gör
-            <span className="ml-2">→</span>
-          </Link>
         </div>
       </div>
     </section>

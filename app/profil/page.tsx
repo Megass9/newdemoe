@@ -5,185 +5,183 @@ import { useRouter } from 'next/navigation';
 import { useUser } from '../context/UserContext';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-
-interface Order {
-  id: number;
-  status: string;
-  total: number;
-  createdAt: string;
-  items: Array<{
-    product: {
-      name: string;
-    };
-    quantity: number;
-    price: number;
-  }>;
-}
+import { User, Package, MapPin, LogOut, Plus, CheckCircle } from 'lucide-react';
 
 export default function Profil() {
-  const { user, isLoggedIn } = useUser();
+  const { user, logout, isLoggedIn } = useUser();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState('bilgiler');
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('profile');
 
   useEffect(() => {
     if (!isLoggedIn) {
       router.push('/giris');
-      return;
     }
+  }, [isLoggedIn, router]);
 
-    if (activeTab === 'siparisler') {
-      fetchOrders();
-    }
-  }, [isLoggedIn, activeTab, router]);
+  if (!user) return null;
 
-  const fetchOrders = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/orders');
-      if (response.ok) {
-        const data = await response.json();
-        // Filter orders for current user (mock - in real app, filter by userId)
-        setOrders(data.slice(0, 3)); // Show last 3 orders
-      }
-    } catch (error) {
-      console.error('Error fetching orders:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    const statusMap: { [key: string]: string } = {
-      PENDING: 'Bekliyor',
-      PROCESSING: 'Hazırlanıyor',
-      SHIPPED: 'Kargoda',
-      DELIVERED: 'Teslim Edildi',
-      CANCELLED: 'İptal Edildi'
-    };
-    return statusMap[status] || status;
-  };
-
-  if (!isLoggedIn) {
-    return null; // Will redirect
-  }
-
-  return (
-    <div>
-      <Header />
-      <div className="container mx-auto px-4 py-16">
-        <h1 className="text-3xl font-bold mb-8">Profilim</h1>
-
-        {/* Tab Navigation */}
-        <div className="flex border-b mb-8">
-          <button
-            onClick={() => setActiveTab('bilgiler')}
-            className={`px-4 py-2 ${activeTab === 'bilgiler' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600'}`}
-          >
-            Bilgilerim
-          </button>
-          <button
-            onClick={() => setActiveTab('adresler')}
-            className={`px-4 py-2 ${activeTab === 'adresler' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600'}`}
-          >
-            Adreslerim
-          </button>
-          <button
-            onClick={() => setActiveTab('siparisler')}
-            className={`px-4 py-2 ${activeTab === 'siparisler' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600'}`}
-          >
-            Siparişlerim
-          </button>
-        </div>
-
-        {/* Tab Content */}
-        {activeTab === 'bilgiler' && (
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4">Kişisel Bilgiler</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Ad Soyad</label>
-                <p className="mt-1 p-2 bg-gray-50 rounded">{user?.name}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Email</label>
-                <p className="mt-1 p-2 bg-gray-50 rounded">{user?.email}</p>
-              </div>
-            </div>
-            <button className="mt-6 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-              Bilgileri Düzenle
-            </button>
-          </div>
-        )}
-
-        {activeTab === 'adresler' && (
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4">Adreslerim</h2>
-            <div className="space-y-4">
-              <div className="border rounded p-4">
-                <h3 className="font-medium">Ev Adresi</h3>
-                <p className="text-gray-600 mt-1">
-                  İstanbul, Kadıköy<br />
-                  Bağdat Caddesi No: 123<br />
-                  34700 Kadıköy/İstanbul
-                </p>
-                <div className="mt-2 space-x-2">
-                  <button className="text-blue-600 hover:underline text-sm">Düzenle</button>
-                  <button className="text-red-600 hover:underline text-sm">Sil</button>
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'profile':
+        return (
+          <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Profil Bilgileri</h2>
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Ad Soyad</label>
+                  <input
+                    type="text"
+                    defaultValue={user.displayName || ''}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
+                    readOnly
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">E-posta</label>
+                  <input
+                    type="email"
+                    defaultValue={user.email}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
+                    readOnly
+                  />
                 </div>
               </div>
+              <button className="bg-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20">
+                Bilgileri Güncelle
+              </button>
             </div>
-            <button className="mt-6 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-              Yeni Adres Ekle
-            </button>
           </div>
-        )}
-
-        {activeTab === 'siparisler' && (
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4">Sipariş Geçmişim</h2>
-            {loading ? (
-              <div className="text-center py-8">Yükleniyor...</div>
-            ) : orders.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                Henüz siparişiniz bulunmuyor.
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {orders.map(order => (
-                  <div key={order.id} className="border rounded p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <h3 className="font-medium">Sipariş #{order.id}</h3>
-                        <p className="text-sm text-gray-600">
-                          {new Date(order.createdAt).toLocaleDateString('tr-TR')}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium">{order.total} TL</p>
-                        <span className={`text-sm px-2 py-1 rounded ${
-                          order.status === 'DELIVERED' ? 'bg-green-100 text-green-800' :
-                          order.status === 'SHIPPED' ? 'bg-blue-100 text-blue-800' :
-                          'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {getStatusText(order.status)}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      {order.items.length} ürün
-                    </div>
-                    <button className="mt-2 text-blue-600 hover:underline text-sm">
-                      Detayları Görüntüle
-                    </button>
+        );
+      case 'orders':
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-900">Sipariş Geçmişi</h2>
+            {/* Mock Orders - Gerçek veriler API'den çekilmeli */}
+            {[1, 2].map((order) => (
+              <div key={order} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 pb-4 border-b border-gray-50">
+                  <div>
+                    <span className="text-sm text-gray-500">Sipariş No</span>
+                    <p className="font-bold text-gray-900">#202400{order}</p>
                   </div>
-                ))}
+                  <div className="mt-2 md:mt-0 text-right">
+                    <span className="text-sm text-gray-500">Tarih</span>
+                    <p className="font-medium text-gray-900">12 Ocak 2024</p>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      Teslim Edildi
+                    </span>
+                  </div>
+                  <p className="font-bold text-blue-600 text-lg">1.250,00 ₺</p>
+                </div>
               </div>
-            )}
+            ))}
           </div>
-        )}
-      </div>
+        );
+      case 'addresses':
+        return (
+          <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Kayıtlı Adresler</h2>
+              <button className="text-blue-600 font-medium hover:text-blue-700 flex items-center gap-1">
+                <Plus className="w-4 h-4" /> Yeni Adres
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="border border-blue-200 bg-blue-50 p-4 rounded-xl relative">
+                <div className="absolute top-4 right-4 text-blue-600">
+                  <CheckCircle className="w-5 h-5" />
+                </div>
+                <h3 className="font-bold text-gray-900 mb-1">Ev Adresim</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  Atatürk Mah. Cumhuriyet Cad. No:123 D:4<br />
+                  Kadıköy / İstanbul
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <Header />
+      <main className="flex-1 container mx-auto px-4 py-12">
+        <div className="flex flex-col lg:flex-row gap-8 max-w-6xl mx-auto">
+          {/* Sidebar */}
+          <aside className="w-full lg:w-72 flex-shrink-0">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-24">
+              <div className="flex items-center gap-4 mb-8 pb-8 border-b border-gray-100">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-xl">
+                  {user.displayName ? user.displayName[0].toUpperCase() : 'U'}
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900">{user.displayName || 'Kullanıcı'}</h3>
+                  <p className="text-xs text-gray-500">{user.email}</p>
+                </div>
+              </div>
+              
+              <nav className="space-y-2">
+                <button
+                  onClick={() => setActiveTab('profile')}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                    activeTab === 'profile' 
+                      ? 'bg-blue-50 text-blue-600 font-medium' 
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
+                >
+                  <User className="w-5 h-5" />
+                  Profil Bilgileri
+                </button>
+                <button
+                  onClick={() => setActiveTab('orders')}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                    activeTab === 'orders' 
+                      ? 'bg-blue-50 text-blue-600 font-medium' 
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
+                >
+                  <Package className="w-5 h-5" />
+                  Siparişlerim
+                </button>
+                <button
+                  onClick={() => setActiveTab('addresses')}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                    activeTab === 'addresses' 
+                      ? 'bg-blue-50 text-blue-600 font-medium' 
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
+                >
+                  <MapPin className="w-5 h-5" />
+                  Adreslerim
+                </button>
+              </nav>
+
+              <div className="mt-8 pt-8 border-t border-gray-100">
+                <button
+                  onClick={logout}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-all duration-200"
+                >
+                  <LogOut className="w-5 h-5" />
+                  Çıkış Yap
+                </button>
+              </div>
+            </div>
+          </aside>
+
+          {/* Content */}
+          <div className="flex-1">
+            {renderContent()}
+          </div>
+        </div>
+      </main>
       <Footer />
     </div>
   );

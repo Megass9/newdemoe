@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "E-Ticaret Demo",
-  description: "Demo e-ticaret sitesi",
+  title: "Vadeli İletişim",
+  description: "Vadeli İletişim - Cep Telefonu, Aksesuar ve Teknik Servis",
 };
 
 export default function RootLayout({

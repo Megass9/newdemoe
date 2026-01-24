@@ -3,139 +3,79 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { useUser } from '../context/UserContext';
+import { ShoppingCart, Search, Menu, Phone } from 'lucide-react';
 
 export default function Header() {
   const { user, logout, isLoggedIn } = useUser();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <header className="bg-white/95 backdrop-blur-md shadow-lg sticky top-0 z-50 border-b border-gray-100">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex justify-between items-center">
-          {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-xl">E</span>
-            </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-              Ticaret
-            </span>
-          </Link>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link href="/" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors duration-200 relative group">
-              Ana Sayfa
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-600 group-hover:w-full transition-all duration-200"></span>
-            </Link>
-            <Link href="/kategoriler" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors duration-200 relative group">
-              Kategoriler
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-600 group-hover:w-full transition-all duration-200"></span>
-            </Link>
-            <Link href="/sepet" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors duration-200 relative group flex items-center">
-              <span className="mr-1">🛒</span> Sepet
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-600 group-hover:w-full transition-all duration-200"></span>
-            </Link>
-            <Link href="/admin" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors duration-200 relative group">
-              Admin
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-600 group-hover:w-full transition-all duration-200"></span>
-            </Link>
-          </nav>
-
-          {/* User Menu */}
-          <div className="hidden md:flex items-center space-x-4">
-            {isLoggedIn ? (
-              <div className="flex items-center space-x-4">
-                <Link href="/profil" className="flex items-center space-x-2 text-gray-700 hover:text-indigo-600 font-medium">
-                  <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center">
-                    <span className="text-white text-sm font-bold">
-                      {user?.name?.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                  <span>{user?.name}</span>
-                </Link>
-                <button
-                  onClick={logout}
-                  className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
-                >
-                  Çıkış
-                </button>
-              </div>
-            ) : (
-              <Link
-                href="/giris"
-                className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-2 rounded-lg font-medium hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
-              >
-                Giriş Yap
-              </Link>
-            )}
+    <nav className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100">
+      <div className="container mx-auto px-4 h-20 flex justify-between items-center">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2 group cursor-pointer">
+          <div className="bg-blue-600 p-2.5 rounded-xl group-hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20">
+            <Phone className="text-white w-6 h-6" />
           </div>
+          <div className="flex flex-col">
+            <h1 className="text-2xl font-bold tracking-tighter leading-none text-gray-900">
+              Vadeli<span className="text-blue-600">İletişim</span>
+            </h1>
+            <span className="text-[10px] text-gray-500 font-medium tracking-widest uppercase">Teknoloji Store</span>
+          </div>
+        </Link>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
-          >
-            <div className="w-6 h-6 flex flex-col justify-center items-center space-y-1">
-              <span className={`w-5 h-0.5 bg-gray-600 transition-all duration-200 ${isMenuOpen ? 'rotate-45 translate-y-1.5' : ''}`}></span>
-              <span className={`w-5 h-0.5 bg-gray-600 transition-all duration-200 ${isMenuOpen ? 'opacity-0' : ''}`}></span>
-              <span className={`w-5 h-0.5 bg-gray-600 transition-all duration-200 ${isMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`}></span>
-            </div>
-          </button>
+        {/* Desktop Search */}
+        <div className="hidden md:flex flex-1 max-w-md mx-8 relative">
+          <input
+            type="text"
+            placeholder="Ne aramıştınız?"
+            className="w-full bg-gray-100 border-transparent focus:bg-white border focus:border-blue-500 rounded-full py-2.5 px-5 pl-11 outline-none transition-all duration-300 text-gray-700"
+          />
+          <Search className="absolute left-4 top-3 text-gray-400 w-5 h-5" />
         </div>
 
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden mt-4 pb-4 border-t border-gray-200 pt-4">
-            <nav className="flex flex-col space-y-4">
-              <Link href="/" className="text-gray-700 hover:text-indigo-600 font-medium py-2" onClick={() => setIsMenuOpen(false)}>
-                Ana Sayfa
+        {/* Actions */}
+        <div className="flex items-center gap-6">
+          {isLoggedIn ? (
+            <div className="hidden md:flex items-center gap-4">
+              <Link href="/profil" className="font-medium text-gray-600 hover:text-blue-600 transition">
+                {user?.displayName || user?.email}
               </Link>
-              <Link href="/kategoriler" className="text-gray-700 hover:text-indigo-600 font-medium py-2" onClick={() => setIsMenuOpen(false)}>
-                Kategoriler
-              </Link>
-              <Link href="/sepet" className="text-gray-700 hover:text-indigo-600 font-medium py-2 flex items-center" onClick={() => setIsMenuOpen(false)}>
-                <span className="mr-2">🛒</span> Sepet
-              </Link>
-              <Link href="/admin" className="text-gray-700 hover:text-indigo-600 font-medium py-2" onClick={() => setIsMenuOpen(false)}>
-                Admin
-              </Link>
-
-              {isLoggedIn ? (
-                <div className="border-t border-gray-200 pt-4 mt-4 space-y-4">
-                  <Link href="/profil" className="flex items-center space-x-2 text-gray-700 hover:text-indigo-600 font-medium py-2" onClick={() => setIsMenuOpen(false)}>
-                    <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-sm font-bold">
-                        {user?.name?.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                    <span>{user?.name}</span>
-                  </Link>
-                  <button
-                    onClick={() => {
-                      logout();
-                      setIsMenuOpen(false);
-                    }}
-                    className="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
-                  >
-                    Çıkış
-                  </button>
-                </div>
-              ) : (
-                <div className="border-t border-gray-200 pt-4 mt-4">
-                  <Link
-                    href="/giris"
-                    className="block bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium text-center hover:from-indigo-700 hover:to-purple-700 transition-all duration-200"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Giriş Yap
-                  </Link>
-                </div>
-              )}
-            </nav>
-          </div>
-        )}
+              <button onClick={logout} className="text-gray-500 hover:text-blue-600 text-sm font-medium">Çıkış</button>
+            </div>
+          ) : (
+            <Link href="/giris" className="hidden md:block font-medium text-gray-600 hover:text-blue-600 transition">
+              Giriş Yap
+            </Link>
+          )}
+          
+          <Link href="/sepet" className="relative p-2 hover:bg-gray-100 rounded-full transition">
+            <ShoppingCart className="w-6 h-6 text-gray-700" />
+            <span className="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">
+              2
+            </span>
+          </Link>
+          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden p-2">
+            <Menu className="w-6 h-6 text-gray-700" />
+          </button>
+        </div>
       </div>
-    </header>
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+          <div className="md:hidden bg-white border-t border-gray-100 py-4 px-4 space-y-4">
+             <Link href="/" className="block text-gray-700 hover:text-blue-600">Ana Sayfa</Link>
+             <Link href="/kategoriler" className="block text-gray-700 hover:text-blue-600">Kategoriler</Link>
+             {isLoggedIn ? (
+                 <>
+                    <Link href="/profil" className="block text-gray-700 hover:text-blue-600">Profil</Link>
+                    <button onClick={logout} className="block text-gray-500 hover:text-blue-600">Çıkış</button>
+                 </>
+             ) : (
+                 <Link href="/giris" className="block text-gray-700 hover:text-blue-600">Giriş Yap</Link>
+             )}
+          </div>
+      )}
+    </nav>
   );
 }

@@ -26,8 +26,13 @@ export default function Kategoriler() {
     fetch('/api/products')
       .then(res => res.json())
       .then(data => {
-        setProducts(data);
-        setFilteredProducts(data);
+        if (Array.isArray(data)) {
+          setProducts(data);
+          setFilteredProducts(data);
+        } else {
+          setProducts([]);
+          setFilteredProducts([]);
+        }
         setLoading(false);
       })
       .catch(error => {
@@ -97,7 +102,7 @@ export default function Kategoriler() {
           </select>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {filteredProducts.map(product => (
+          {Array.isArray(filteredProducts) && filteredProducts.map(product => (
             <div key={product.id} className="bg-white shadow-md rounded-lg overflow-hidden">
               <Link href={`/urun/${product.id}`}>
                 <img src={product.images[0] || '/placeholder.jpg'} alt={product.name} className="w-full h-48 object-cover cursor-pointer" />
