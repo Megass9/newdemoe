@@ -8,7 +8,7 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 
 interface Product {
-  id: number;
+  id: string;
   name: string;
   price: number;
   images: string[];
@@ -39,7 +39,8 @@ export default function UrunDetayPage() {
       })
       .then(data => {
         if (Array.isArray(data)) {
-          const foundProduct = data.find((p: Product) => p.id === Number(id));
+          // Firebase ID'leri string olduğu için Number() dönüşümünü kaldırıyoruz
+          const foundProduct = data.find((p: Product) => p.id === id);
           if (foundProduct) {
             setProduct(foundProduct);
           } else {
