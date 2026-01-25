@@ -25,8 +25,12 @@ import {
   XCircle,
   List,
   Phone,
-  RefreshCw
+  RefreshCw,
+  Mail
 } from 'lucide-react';
+
+import { db } from '../../lib/firebase';
+import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 
 interface Order {
   id: string;
@@ -94,6 +98,7 @@ export default function AdminPanel() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [subscribers, setSubscribers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -122,6 +127,7 @@ export default function AdminPanel() {
       fetchOrders();
       fetchProducts();
       fetchCategories();
+      fetchSubscribers();
     } else {
       alert('Yanlış şifre!');
     }
@@ -168,6 +174,20 @@ export default function AdminPanel() {
       }
     } catch (error) {
       console.error('Error fetching categories:', error);
+    }
+  };
+
+  const fetchSubscribers = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, 'newsletter'));
+      const data = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      // @ts-ignore
+      setSubscribers(data.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+    } catch (error) {
+      console.error('Error fetching subscribers:', error);
     }
   };
 
@@ -334,6 +354,19 @@ export default function AdminPanel() {
     }
   };
 
+  const deleteSubscriber = async (id: string) => {
+    if (!confirm('Bu aboneyi silmek istediğinizden emin misiniz?')) return;
+
+    try {
+      await deleteDoc(doc(db, 'newsletter', id));
+      setSubscribers(subscribers.filter(s => s.id !== id));
+      alert('Abone silindi!');
+    } catch (error) {
+      console.error('Error deleting subscriber:', error);
+      alert('Hata oluştu!');
+    }
+  };
+
   const getStatusText = (status: string) => {
     const statusMap: { [key: string]: string } = {
       PENDING: 'Bekliyor',
@@ -481,6 +514,20 @@ export default function AdminPanel() {
                     Kategoriler
                     <span className="ml-auto bg-gray-100 text-gray-600 text-xs py-0.5 px-2 rounded-full">
                       {categories.length}
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('newsletter')}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                      activeTab === 'newsletter' 
+                        ? 'bg-blue-50 text-blue-600 font-medium' 
+                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    }`}
+                  >
+                    <Mail className="w-5 h-5" />
+                    Bülten Aboneleri
+                    <span className="ml-auto bg-gray-100 text-gray-600 text-xs py-0.5 px-2 rounded-full">
+                      {subscribers.length}
                     </span>
                   </button>
                 </nav>
@@ -794,6 +841,58 @@ export default function AdminPanel() {
                         ))}
                         {categories.length === 0 && (
                           <tr><td colSpan={3} className="px-6 py-8 text-center text-gray-500">Kategori bulunamadı.</td></tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* Newsletter Tab */}
+              {activeTab === 'newsletter' && (
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                    <div className="flex items-center gap-3">
+                      <h2 className="text-xl font-bold text-gray-800">Bülten Aboneleri</h2>
+                      <button 
+                        onClick={fetchSubscribers} 
+                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-blue-600"
+                        title="Listeyi Yenile"
+                      >
+                        <RefreshCw className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <table className="w-full text-left">
+                      <thead className="bg-gray-50 text-gray-600 text-xs uppercase font-semibold">
+                        <tr>
+                          <th className="px-6 py-4">E-posta Adresi</th>
+                          <th className="px-6 py-4">Kayıt Tarihi</th>
+                          <th className="px-6 py-4 text-right">İşlemler</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {subscribers.map((sub) => (
+                          <tr key={sub.id} className="hover:bg-gray-50/50 transition-colors">
+                            <td className="px-6 py-4 font-medium text-gray-900">{sub.email}</td>
+                            <td className="px-6 py-4 text-gray-600 text-sm">
+                              {sub.createdAt ? new Date(sub.createdAt).toLocaleDateString('tr-TR') : '-'}
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <button
+                                onClick={() => deleteSubscriber(sub.id)}
+                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                title="Sil"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                        {subscribers.length === 0 && (
+                          <tr><td colSpan={3} className="px-6 py-8 text-center text-gray-500">Henüz abone bulunmuyor.</td></tr>
                         )}
                       </tbody>
                     </table>

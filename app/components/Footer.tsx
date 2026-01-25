@@ -1,9 +1,35 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
-import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin, ArrowRight, Lock } from 'lucide-react';
+import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin, ArrowRight, Lock, Loader2, Check } from 'lucide-react';
+import { db } from '../../lib/firebase';
+import { collection, addDoc } from 'firebase/firestore';
 
 export default function Footer() {
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || status === 'loading') return;
+
+    setStatus('loading');
+    try {
+      await addDoc(collection(db, 'newsletter'), {
+        email,
+        createdAt: new Date().toISOString()
+      });
+      setStatus('success');
+      setEmail('');
+      setTimeout(() => setStatus('idle'), 3000);
+    } catch (error) {
+      console.error('Newsletter subscription error:', error);
+      setStatus('error');
+      setTimeout(() => setStatus('idle'), 3000);
+    }
+  };
+
   return (
     <footer className="bg-gray-900 text-gray-300 pt-16 pb-8 border-t border-gray-800">
       <div className="container mx-auto px-4">
@@ -118,14 +144,25 @@ export default function Footer() {
             <p className="text-sm mb-4 text-gray-400">
               En yeni ürünler ve indirimlerden haberdar olmak için bültenimize abone olun.
             </p>
-            <form className="flex flex-col gap-3 mb-6" onSubmit={(e) => e.preventDefault()}>
+            <form className="flex flex-col gap-3 mb-6" onSubmit={handleSubscribe}>
               <input 
                 type="email" 
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="E-posta adresiniz" 
                 className="bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-3 w-full focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-sm" 
               />
-              <button className="bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-all font-medium text-sm shadow-lg shadow-blue-600/20">
-                Abone Ol
+              <button 
+                type="submit"
+                disabled={status === 'loading' || status === 'success'}
+                className={`px-4 py-3 rounded-lg transition-all font-medium text-sm shadow-lg flex items-center justify-center gap-2 ${status === 'success' ? 'bg-green-600 text-white' : 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-600/20'}`}
+              >
+                {status === 'loading' && <Loader2 className="w-4 h-4 animate-spin" />}
+                {status === 'success' && <Check className="w-4 h-4" />}
+                {status === 'idle' && 'Abone Ol'}
+                {status === 'success' && 'Abone Olundu!'}
+                {status === 'error' && 'Hata Oluştu'}
               </button>
             </form>
             
